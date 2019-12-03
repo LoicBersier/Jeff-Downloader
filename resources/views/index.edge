@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="has-background-grey-dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ title }}" />
+    <meta property="og:description" content="A simple video downloader without any ad or tracking." />
+    <meta property="og:url" content="https://namejeff.xyz/" />
+    <meta property="og:image" content="https://namejeff.xyz/asset/jeff.png" />
+    <meta name="theme-color" content="#3b2ccf" />
+    <link rel="icon" href="/asset/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="asset/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <title>{{ title }}</title>
+</head>
+<body class="gradientBG has-text-light">
+    <header>
+        <section class="section" id="announcement">
+            <div class="container">
+                @if(announcement || (day == '24' || day == '25') && month == '11')
+                <div class="message is-info">
+                    <div class="message-header">
+                        Announcement
+                        <button class="delete" onclick="fadeout('announcement')"></button>
+                    </div>
+                    <div class="message-body">
+                        @if((day == '24' || day == '25') && month == '11')
+                        <p class="title">Happy Christmas!</p>
+                        @endif
+                        <p class="subtitle">{{ announcement }}</p>
+                    </div>
+                </div>  
+                @endif
+            </div>
+        </section>
+    </header>
+
+    <section class="section has-text-centered">
+        <div class="container ">
+                <div class="downloader form">
+                    <h1 class="title has-text-light">{{ title }}</h1>
+                    <form name="download-form" method="POST" action="/">
+                    {{ csrfField() }}
+            
+                    <div class="field is-horizontal">
+                        <div class="field-body">
+                            <div class="field is-horizontal">
+                                <div class="control">
+                                    <label class="radio" for="small">
+                                        <input class="radio" type="radio" name="quality" id="small" value="small">                                
+                                        Bad
+                                    </label>
+                                
+                                    <label class="radio" for="high">
+                                        <input class="radio" type="radio" name="quality" id="high" value="high" checked>                                
+                                        Good
+                                    </label>
+                                
+                                    <label class="checkbox" for="alt">
+                                        <input class="checkbox" type="checkbox" name="alt" id="alt" title="Use this if download dosen't work">
+                                        Alternate download?
+                                    </label>
+    
+                                    <label class="checkbox" for="feed">
+                                        <input class="checkbox" type="checkbox" name="feed" id="feed" title="Use this if you don't want the video you are downloading to be public">
+                                        Hide from feed?
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                    
+                    <div class="field-body">
+                            <div class="field is-expanded">
+                              <div class="field has-addons">
+                                <p class="control is-expanded">
+                                    <input type="text" id="URL" name="URL" class="downloadurl input is-rounded" placeholder="Link">
+                                </p>
+                                <p class="control">
+                                    <button type="button" class="downloadbtn button is-primary is-rounded" id="button" onclick="submitDownload()">Download that mf video</button>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+    
+    
+                    <div class="field has-addon">
+                        <div class="control">
+                        </div>
+                        <div class="control">
+                        </div>
+                    </div>
+    
+                    <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field is-horizontal">
+                                    <div class="control">
+                                        <label class="radio" for="mp4">
+                                            <input class="radio" type="radio" name="format" value="mp4" id="mp4" checked>
+                                            MP4?
+                                        </label>
+                                    
+                                        <label class="radio" for="mp3">
+                                            <input class="radio" type="radio" name="format" value="mp3" id="mp3">
+                                            MP3?
+                                        </label>
+                                    
+                                        <label class="radio" for="flac">
+                                            <input class="radio" type="radio" name="format" value="flac" id="flac">
+                                            FLAC?
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>  
+                    </form>
+                    
+                    <div class="contaianer">
+                        <div id="msg"></div>                
+                        @if(error)
+                        <div class="notification is-danger fadein" id="error">
+                            <button class="delete" onclick="fadeout('error')"></button>
+                            {{ errormsg }}
+                        </div>
+                        @endif
+                    </div>
+                </div>
+        </div>
+    </section>
+
+    @if(file != "")
+    <section class="section">
+        <p class="title has-text-light has-text-centered">Recently downloaded videos</p> 
+        <div class="tile fadein">
+            @each(file in file)
+            <div class="tile is-parent hvr-grow">
+                <article class="tile is-child box notification is-info">
+                    <p class="subtitle">{{ file.name }}</p>
+                    <p>{{ file.size }} MB</p>
+                    <br>
+                    <div class="content">
+                        <p><a class="button is-link is-rounded" href="{{ file.location }}" download>Download<i class="fas fa-fw fa-file-download" aria-hidden="true"></i></a></p>
+                        <p><button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">Add to clipboard<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button></p>
+                    </div>
+                    <figure class="image">
+                        <img src="data:image/png;base64, {{ file.img }}">
+                    </figure>
+                </article>
+            </div>
+            @endeach
+        </div>
+    </section>
+    @endif
+
+    <footer class="footer has-background-grey-dark has-text-light has-text-centered">
+        <p>Credit to <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - My other project <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - Numbers of visits: {{ viewCounter }} - Contact Supositware#1616 on Discord if you have any issues</p>
+        <p>You can also support me either on <a href="https://www.paypal.me/supositware">Paypal</a> or by tipping <a href="https://basicattentiontoken.org/">BAT</a> on this website! or using my referal link for <a href="https://brave.com/nam120">Brave Browser </a> 
+        <p><a href="legacy">Legacy version</a></p>
+    </footer>
+    @if(month == '11')
+    <script src="snow.js"></script>
+    @endif
+</body>
+<script>
+    function submitDownload() {
+        let frm = document.getElementsByName('download-form')[0];
+        frm.submit();
+        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif"></button>Download started!</div>';
+        setTimeout(() => {
+            fadeout('notif')
+        }, 2000);
+        frm.reset();
+        return false;
+    }
+
+    function fadeout(id) {
+        document.getElementById(id).classList.add('fadeout');
+        setTimeout(() => {
+            let element = document.getElementById(id);
+            element.parentNode.removeChild(element);
+        }, 2000);
+    }
+
+    function toClipboard(text) {
+        navigator.clipboard.writeText(text)
+        .catch(err => {
+            console.error(err);
+            document.getElementById('msg').innerHTML = '<div class="notification is-error fadein" id="notif">An error has occured while copying the link to your clipboard.</div>';
+            setTimeout(() => {
+                fadeout('notif')                
+            }, 2000);
+        });
+        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif">Success fully copied link to your clipboard!</div>';
+        setTimeout(() => {
+            fadeout('notif')
+        }, 2000);
+    }
+    // If alt download block other settings since they don't work anyway
+    document.getElementById('alt').onclick = function() {
+        if(document.getElementById('alt').checked) {
+            document.getElementById('small').disabled = true;
+            document.getElementById('small').checked = false;
+
+            document.getElementById('mp3').disabled = true;
+            document.getElementById('mp3').checked = false;
+            document.getElementById('flac').disabled = true;
+            document.getElementById('flac').checked = false;
+            document.getElementById('mp4').checked = true;
+            document.getElementById('high').checked = true;
+            document.getElementById('feed').checked = false;
+            document.getElementById('feed').disabled = true;
+        } else {
+            document.getElementById('small').disabled = false;
+            document.getElementById('feed').disabled = false;
+            document.getElementById('mp3').disabled = false;
+            document.getElementById('flac').disabled = false;
+        }
+    }
+
+    // If user press enter do samething as if pressing the button
+    let input = document.getElementById("URL");
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("button").click();
+        }
+    });
+</script>
+</html>

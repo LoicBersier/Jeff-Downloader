@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ title }} (legacy)" />
+    <meta property="og:description" content="A simple video downloader without any ad or tracking." />
+    <meta property="og:url" content="https://namejeff.xyz/" />
+    <meta property="og:image" content="https://namejeff.xyz/jeff.png" />
+    <meta name="theme-color" content="#262d2c" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="legacy.css">
+    <title>{{ title }}  (legacy)</title>
+</head>
+<body>
+    @if(announcement || (day == '24' || day == '25') && month == '11')
+    <div class="announcements">
+        @if((day == '24' || day == '25') && month == '11')
+        <p>Happy christmas!</p>
+        @endif
+        <p>{{ announcement }}</p>
+        <p>This part of the website is <strong>legacy</strong> which mean it can be broken at any time!</p>
+    </div>
+   @endif 
+    <div class="downloader">
+        <h1 class="title">{{ title }}  (legacy)</h1>
+        <form name="download-form" method="POST" action="/legacy">
+        {{ csrfField() }}
+
+        <label for="small">Worst quality</label>
+        <input type="radio" name="quality" id="small" value="small">
+
+        <label for="high">Best quality</label>
+        <input type="radio" name="quality" id="high" value="high" checked>
+
+        <label for="alt">Alternate download?</label>
+        <input type="checkbox" name="alt" id="alt" title="Use this if download dosen't work">
+
+        <label for="feed">Hide from feed?</label>
+        <input type="checkbox" name="feed" id="feed" title="Chcek this to hide the video from public feed">
+
+        <br>
+        <br>
+
+        <input type="text" id="URL" name="URL" class="downloadurl"><button type="button" class="downloadbtn" id="button" onclick="submitDownload()">Download that mf video</button>
+
+        <br>
+        <br>
+
+        <label for="mp4">MP4?</label>
+        <input type="radio" name="format" value="mp4" id="mp4" checked>
+
+        <label for="mp3">MP3?</label>
+        <input type="radio" name="format" value="mp3" id="mp3">
+
+        <label for="flac">FLAC?</label>
+        <input type="radio" name="format" value="flac" id="flac">
+        <p id="msg"></p>
+        </form>
+
+    @if(error)
+    <p>{{ errormsg }}</p>
+    @endif
+
+    </div>
+</body>
+
+<footer>
+<p>Credit to <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - My other project <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> - Numbers of visits: {{ viewCounter }} - Contact Supositware#1616 if you have any issues</p>
+<p><a href="/">Return to main page</a></p>
+</footer>
+@if(month == '11')
+<script src="snow.js"></script>
+@endif
+<script>
+    // If alt download block other settings since they don't work anyway
+    document.getElementById('alt').onclick = function() {
+        if(document.getElementById('alt').checked) {
+            document.getElementById('small').disabled = true;
+            document.getElementById('small').checked = false;
+
+            document.getElementById('mp3').disabled = true;
+            document.getElementById('mp3').checked = false;
+            document.getElementById('flac').disabled = true;
+            document.getElementById('flac').checked = false;
+            document.getElementById('mp4').checked = true;
+            document.getElementById('high').checked = true;
+            document.getElementById('feed').checked = false;
+            document.getElementById('feed').disabled = true;
+        } else {
+            document.getElementById('small').disabled = false;
+            document.getElementById('feed').disabled = false;
+            document.getElementById('mp3').disabled = false;
+            document.getElementById('flac').disabled = false;
+        }
+    }
+
+    function submitDownload() {
+        console.log('clicked')
+        let frm = document.getElementsByName('download-form')[0];
+        frm.submit();
+        document.getElementById('msg').innerHTML = 'Download started!'
+        frm.reset();
+        return false;
+    }
+</script>
+</html>

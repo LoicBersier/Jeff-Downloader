@@ -1,0 +1,40 @@
+{
+  "name": "adonis-fullstack-app",
+  "version": "0.11.3",
+  "adonis-version": "4.1.0",
+  "description": "A video downloader based on youtube-dl",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node ace test"
+  },
+  "keywords": [
+    "adonisjs",
+    "adonis-app"
+  ],
+  "author": "Loïc Bersier",
+  "license": "",
+  "private": true,
+  "dependencies": {
+    "@adonisjs/ace": "^5.0.8",
+    "@adonisjs/auth": "^3.0.7",
+    "@adonisjs/bodyparser": "^2.0.9",
+    "@adonisjs/cors": "^1.0.7",
+    "@adonisjs/fold": "^4.0.9",
+    "@adonisjs/framework": "^5.0.9",
+    "@adonisjs/ignitor": "^2.0.8",
+    "@adonisjs/lucid": "^6.1.3",
+    "@adonisjs/session": "^1.0.27",
+    "@adonisjs/shield": "^1.0.8",
+    "@adonisjs/validator": "^5.0.6",
+    "fluent-ffmpeg": "^2.1.2",
+    "mysql": "^2.17.1",
+    "node-fetch": "^2.6.0",
+    "time-stamp": "^2.2.0",
+    "youtube-dl": "^1.13.1"
+  },
+  "devDependencies": {},
+  "autoload": {
+    "App": "./app"
+  }
+}
