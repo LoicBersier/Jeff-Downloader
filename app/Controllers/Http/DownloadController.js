@@ -28,7 +28,7 @@ class DownloadController {
     }
     // get the 5 most recent files
     file = file.sort(function(a, b) {
-      if ((a || b).endsWith('.mp4') && !(a || b).startsWith('HIDE')) {
+      if (((a || b).endsWith('.mp4') || (a || b).endsWith('.mp3') || (a || b).endsWith('.flac')) && !(a || b).startsWith('HIDE')) {
         let time1 = fs.statSync(`./public/uploads/${b}`).ctime;
         let time2 = fs.statSync(`./public/uploads/${a}`).ctime; 
         if (time1 < time2) return -1;
