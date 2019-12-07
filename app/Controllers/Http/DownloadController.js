@@ -165,10 +165,10 @@ class DownloadController {
             .audioFrequency('44100')
             .audioBitrate('320k')
             .format(data.format)
-            .save(`./public/uploads/${DLFile}.${data.format}`)
+            .save(`./public/uploads/${DLFile.replace('.mp4', `.${data.format}`)}`)
             .on('end', () => {
               fs.unlinkSync(`./public/uploads/${DLFile}`);
-              return response.attachment(`./public/uploads/${DLFile}.${data.format}`);
+              return response.attachment(`./public/uploads/${DLFile.replace('.mp4', `.${data.format}`)}`);
             })
           }
         });
