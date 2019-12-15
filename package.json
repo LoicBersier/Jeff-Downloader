@@ -1,20 +1,22 @@
 {
-  "name": "adonis-fullstack-app",
+  "name": "jeff-downloader",
   "version": "0.11.3",
   "adonis-version": "4.1.0",
   "description": "A video downloader based on youtube-dl",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "node ace test"
   },
   "keywords": [
     "adonisjs",
-    "adonis-app"
+    "adonis-app",
+    "youtubedl",
+    "youtube-dl"
   ],
   "author": "Loïc Bersier",
   "license": "",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@adonisjs/ace": "^5.0.8",
     "@adonisjs/auth": "^3.0.7",
@@ -30,7 +32,6 @@
     "fluent-ffmpeg": "^2.1.2",
     "mysql": "^2.17.1",
     "node-fetch": "^2.6.0",
-    "time-stamp": "^2.2.0",
     "youtube-dl": "^1.13.1"
   },
   "devDependencies": {},
