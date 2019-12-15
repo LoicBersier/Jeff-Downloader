@@ -2,13 +2,14 @@
 const youtubedl = require('youtube-dl')
 const fs = require('fs')
 const ffmpeg = require('fluent-ffmpeg')
-const timestamp = require('time-stamp')
+const pJson = require('../../../package.json');
 
 let viewCounter = 0;
 let files = [];
 let day;
 let month;
 let announcement = 'Twitter download seems to work fine now!';
+let title = `le epic downloader v${pJson.version}`;
 
 class DownloadController {
 
@@ -19,7 +20,7 @@ class DownloadController {
     month = today.getMonth();
 
     viewCounter++;
-    if (response.request.url == '/legacy') return view.render('legacy', { title: 'le epic downloader v0.11.3', viewCounter: viewCounter, day: day, month: month, announcement: announcement});
+    if (response.request.url == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
 
     files = [];
     let file = []
@@ -65,7 +66,7 @@ class DownloadController {
         files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}`, img: fs.readFileSync(`./public/asset/music.png`).toString('base64') });
       }
     });
-		return view.render('index', { title: 'le epic downloader v0.11.3', viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement });
+		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement });
   }
 
   async download({ view, request, response }) {
@@ -86,7 +87,7 @@ class DownloadController {
 
       if (!data.url) {
         return view.render(page, {
-          title: 'le epic downloader v0.11.3',
+          title: title,
           viewCounter: viewCounter,
           file: files,
           day: day, month: month, announcement: announcement ,
@@ -112,7 +113,7 @@ class DownloadController {
         return youtubedl.exec(data.url, ['--format=mp4', '-o', `public/uploads/alt.mp4`], {}, function(err, output) {
           if (err) {
             return view.render(page, {
-              title: 'le epic downloader v0.11.3',
+              title: title,
               viewCounter: viewCounter,
               file: files,
               day: day, month: month, announcement: announcement ,
@@ -128,9 +129,9 @@ class DownloadController {
         let video = youtubedl(data.url, ['--format=mp4', '-f', option]);
 
         video.on('error', function(err) {
-          console.error(err)
+          console.error(err);
           return view.render(page, {
-            title: 'le epic downloader v0.11.3',
+            title: title,
             viewCounter: viewCounter,
             file: files,
             day: day, month: month, announcement: announcement ,
@@ -141,13 +142,14 @@ class DownloadController {
 
         video.on('info', function(info) {
           // Set file name
-          let title = info.title;
-          DLFile = `${timestamp('DD_MM_YYYY')}${title.slice(0,10).replace(/\s/g, '_')}.${info.ext}`;
+          let title = info.title.slice(0,80);
+          DLFile = `${title.replace(/\s/g, '_')}.${info.ext}`;
+
           // If no title use the ID
           if (title == '_') title = `_${info.id}`;
           // If user want to hide from the feed 
           if (data.feed == 'on') 
-            DLFile = `HIDE${timestamp('DD_MM_YYYY')}${title.slice(0,10).replace(/\s/g, '_')}.${info.ext}`;
+            DLFile = `HIDE${title.replace(/\s/g, '_')}.${info.ext}`;
 
           DLFile = DLFile.replace(/[()]/g, '_');
           video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
