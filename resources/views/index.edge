@@ -52,12 +52,12 @@
                                 <div class="control">
                                     <label class="radio" for="small">
                                         <input class="radio" type="radio" name="quality" id="small" value="small">                                
-                                        Bad
+                                        Low quality
                                     </label>
                                 
                                     <label class="radio" for="high">
                                         <input class="radio" type="radio" name="quality" id="high" value="high" checked>                                
-                                        Good
+                                        High quality
                                     </label>
                                 
                                     <label class="checkbox" for="alt">
@@ -101,7 +101,7 @@
                                     <div class="control">
                                         <label class="radio" for="mp4">
                                             <input class="radio" type="radio" name="format" value="mp4" id="mp4" checked>
-                                            MP4?
+                                            Video?
                                         </label>
                                     
                                         <label class="radio" for="mp3">
@@ -147,7 +147,11 @@
                         <p><button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">Add to clipboard<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button></p>
                     </div>
                     <figure class="image">
-                        <img src="data:image/png;base64, {{ file.img }}">
+                        <video muted width="720" height="480" loop onmouseover="this.play()" onmouseout="this.pause();">
+                            <source src="{{ file.location }}" type="video/mp4">
+                            <img src="data:image/png;base64, {{ file.img }}">
+                        </video>
+                        <!-- <img src="data:image/png;base64, {{ file.img }}"> -->
                     </figure>
                 </article>
             </div>
@@ -157,6 +161,7 @@
     @endif
 
     <footer class="footer has-background-grey-dark has-text-light has-text-centered">
+        <p>I decline any responsabilities for download made using this website.</p>
         <p>Credit to <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - My other project <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - Numbers of visits: {{ viewCounter }} - Contact Supositware#1616 on Discord if you have any issues</p>
         <p>You can also support me either on <a href="https://www.paypal.me/supositware">Paypal</a> or by tipping <a href="https://basicattentiontoken.org/">BAT</a> on this website! or using my referal link for <a href="https://brave.com/nam120">Brave Browser </a> 
         <p><a href="legacy">Legacy version</a></p>
