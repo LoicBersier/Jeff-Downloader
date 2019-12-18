@@ -147,7 +147,7 @@
                         <p><button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">Add to clipboard<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button></p>
                     </div>
                     <figure class="image">
-                        <video muted width="720" height="480" loop onmouseover="this.play()" onmouseout="this.pause();">
+                        <video muted width="720" height="480" loop onmouseover="this.play()" onmouseout="this.pause();" oncanplay="this.muted=true">
                             <source src="{{ file.location }}" type="video/mp4">
                             <img src="data:image/png;base64, {{ file.img }}">
                         </video>
