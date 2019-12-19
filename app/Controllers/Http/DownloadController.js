@@ -57,11 +57,9 @@ class DownloadController {
         });
         */
 
-        if (fs.existsSync(`./public/thumbnail/${file}.png`)) {
-          // Send file name, file size in MB relative path for the file
-          files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}` });
-          fs.unlinkSync(`./public/thumbnail/${file}.png`);
-        }
+        // Send file name, file size in MB relative path for the file
+        files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}` });
+        
         // If mp3 or flac and not to be hidden from the recent feed
       } else if ((file.endsWith('.mp3') || file.endsWith('.flac')) && !file.startsWith('HIDE')) {
         let fileInfo = fs.statSync(`./public/uploads/${file}`);
