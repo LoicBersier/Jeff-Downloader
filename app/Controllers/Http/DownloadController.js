@@ -8,7 +8,7 @@ let viewCounter = 0;
 let files = [];
 let day;
 let month;
-let announcementArray = ['Twitter download seems to work fine now!', 'u lookin hot today vro', 'I am not responsible for what you download', 'If you want to support me you can donate through my paypal at the bottom of the page', 'Did you know this website is open source?', 'Did you know this website can download from other website than youtube?']
+let announcementArray = ['Twitter download seems to work fine now!', 'u lookin hot today vro', 'I am not responsible for what you download', 'If you want to support me you can donate through my paypal at the bottom of the page', 'Did you know this website is open source?', 'Did you know this website can download from other website than youtube?', 'You can mouse hover a video to see a preview of it!']
 let announcement
 let title = `le epic downloader v${pJson.version}`;
 
@@ -46,6 +46,7 @@ class DownloadController {
       // If mp4 and is not to be hidden from the recent feed
       if ((file.endsWith('.mp4') || file.endsWith('.webm')) && !file.startsWith('HIDE')) {
         let fileInfo = fs.statSync(`./public/uploads/${file}`);
+        /*
         // Take screenshot at the first frame of the mp4 file
 
         ffmpeg(`./public/uploads/${file}`)
@@ -54,21 +55,18 @@ class DownloadController {
           console.error(err);
           return;
         });
+        */
 
         if (fs.existsSync(`./public/thumbnail/${file}.png`)) {
-          // Get the image as base64
-          let imgData = fs.readFileSync(`./public/thumbnail/${file}.png`).toString('base64');
-          if (imgData) {
-            // Send file name, file size in MB relative path for the file and base64 of the image
-            files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}`, img: imgData });
-            fs.unlinkSync(`./public/thumbnail/${file}.png`);
-          }
+          // Send file name, file size in MB relative path for the file
+          files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}` });
+          fs.unlinkSync(`./public/thumbnail/${file}.png`);
         }
         // If mp3 or flac and not to be hidden from the recent feed
       } else if ((file.endsWith('.mp3') || file.endsWith('.flac')) && !file.startsWith('HIDE')) {
         let fileInfo = fs.statSync(`./public/uploads/${file}`);
-        // Send file name, file size in MB relative path for the file and base64 of music.png
-        files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}`, img: fs.readFileSync(`./public/asset/music.png`).toString('base64') });
+        // Send file name, file size in MB relative path for the file and relative path of music.png
+        files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}`, img: `/asset/music.png` });
       }
     });
 		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement });
