@@ -2,7 +2,7 @@
 const youtubedl = require('youtube-dl')
 const fs = require('fs')
 const ffmpeg = require('fluent-ffmpeg')
-const pJson = require('../../../package.json');
+const { version } = require('../../../package.json');
 
 let viewCounter = 0;
 let files = [];
@@ -10,30 +10,29 @@ let day;
 let month;
 let announcementArray = ['Twitter download seems to work fine now!', 'u lookin hot today vro', 'I am not responsible for what you download', 'If you want to support me you can donate through my paypal at the bottom of the page', 'Did you know this website is open source?', 'Did you know this website can download from other website than youtube?', 'You can mouse hover a video to see a preview of it!']
 let announcement
-let title = `le epic downloader v${pJson.version}`;
+let title = `le epic downloader v${version}`;
 
 class DownloadController {
 
   async index ({ view, response }) {
+    viewCounter++;
     // Get random announcement
     announcement = announcementArray[Math.floor(Math.random() * announcementArray.length)];
-
     // Get date for some event
     let today = new Date();
     day = today.getDay();
     month = today.getMonth();
-
-    viewCounter++;
+    // If legacy link return
     if (response.request.url == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
-
+    
     files = [];
-    let file = []
+    let file = [];
     for (let f of fs.readdirSync('./public/uploads')) {
       file.push(f)
     }
     // get the 5 most recent files
-    file = file.sort(function(a, b) {
-      if (((a || b).endsWith('.mp4') || (a || b).endsWith('.webm') || (a || b).endsWith('.mp3') || (a || b).endsWith('.flac')) && !(a || b).startsWith('HIDE')) {
+    file = file.sort((a, b) => {
+      if ((a || b).endsWith('.mp4') || (a || b).endsWith('.webm') || (a || b).endsWith('.mp3') || (a || b).endsWith('.flac')) {
         let time1 = fs.statSync(`./public/uploads/${b}`).ctime;
         let time2 = fs.statSync(`./public/uploads/${a}`).ctime; 
         if (time1 < time2) return -1;
@@ -42,31 +41,16 @@ class DownloadController {
       return 0;
     }).slice(0, 5)
 
-    file.forEach((file) => {
-      // If mp4 and is not to be hidden from the recent feed
-      if ((file.endsWith('.mp4') || file.endsWith('.webm')) && !file.startsWith('HIDE')) {
-        let fileInfo = fs.statSync(`./public/uploads/${file}`);
-        /*
-        // Take screenshot at the first frame of the mp4 file
-
-        ffmpeg(`./public/uploads/${file}`)
-        .takeScreenshots({ count: 1, timemarks: [ 1 ], size: '720x480', filename: file + '.png' }, 'public/thumbnail')
-        .on('error', (err) => {
-          console.error(err);
-          return;
-        });
-        */
-
+    
+    for (let f of file) {      
+      if (f.endsWith('.mp4') || f.endsWith('.webm')) {
         // Send file name, file size in MB relative path for the file
-        files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}` });
-        
-        // If mp3 or flac and not to be hidden from the recent feed
-      } else if ((file.endsWith('.mp3') || file.endsWith('.flac')) && !file.startsWith('HIDE')) {
-        let fileInfo = fs.statSync(`./public/uploads/${file}`);
+        files.push({ name: f, size: (fs.statSync(`./public/uploads/${f}`).size / 1000000.0).toFixed(2), location: `uploads/${f}` });
+      } else if (f.endsWith('.mp3') || f.endsWith('.flac')) {
         // Send file name, file size in MB relative path for the file and relative path of music.png
-        files.push({ name: file, size: (fileInfo.size / 1000000.0).toFixed(2), location: `uploads/${file}`, img: `/asset/music.png` });
+        files.push({ name: f, size: (fs.statSync(`./public/uploads/${f}`).size / 1000000.0).toFixed(2), location: `uploads/${f}`, img: `/asset/music.png` });
       }
-    });
+    }
 		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement });
   }
 
@@ -152,7 +136,7 @@ class DownloadController {
           if (title == '_') title = `_${info.id}`;
           // If user want to hide from the feed 
           if (data.feed == 'on') 
-            DLFile = `HIDE${title.replace(/\s/g, '_')}.${ext}`;
+            DLFile = `hidden/${title.replace(/\s/g, '_')}.${ext}`;
 
           DLFile = DLFile.replace(/[()]/g, '_');
           video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
@@ -170,10 +154,10 @@ class DownloadController {
             .audioFrequency('44100')
             .audioBitrate('320k')
             .format(data.format)
-            .save(`./public/uploads/${DLFile.replace(ext, `.${data.format}`)}`)
+            .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
             .on('end', () => {
               fs.unlinkSync(`./public/uploads/${DLFile}`);
-              return response.attachment(`./public/uploads/${DLFile.replace(ext, `.${data.format}`)}`);
+              return response.attachment(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
             })
           }
         });
