@@ -20,8 +20,14 @@ database/development.sqlite
 
 # video files
 public/uploads/*.mp4
+public/uploads/*.webm
 public/uploads/*.mp3
 public/uploads/*.flac
+public/uploads/hidden/*.mp4
+public/uploads/hidden/*.webm
+public/uploads/hidden/*.mp3
+public/uploads/hidden/*.flac
+
 
 # Thumbnail 
 public/Thumbnail/*.*
