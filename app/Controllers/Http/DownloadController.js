@@ -89,13 +89,20 @@ class DownloadController {
 
       // If alt download ( Quality settings and file format option doesn't work here )
       if (data.alt) {
-        if (fs.existsSync('./public/uploads/alt.mp4')) {
-          fs.unlink('./public/uploads/alt.mp4', (err) => {
+        let altFolder;
+        if (data.feed == 'on') {
+          altFolder = './public/uploads/hidden/alt.mp4';
+        } else {
+          altFolder = './public/uploads/alt.mp4'
+        }
+
+        if (fs.existsSync(altFolder)) {
+          fs.unlink(altFolder, (err) => {
             if (err);
           });
         }
   
-        return youtubedl.exec(data.url, ['--format=mp4', '-o', `public/uploads/alt.mp4`], {}, function(err, output) {
+        return youtubedl.exec(data.url, ['--format=mp4', '-o', altFolder], {}, function(err, output) {
           if (err) {
             return view.render(page, {
               title: title,
@@ -107,7 +114,7 @@ class DownloadController {
             });
           }
   
-          return response.attachment('./public/uploads/alt.mp4');
+          return response.attachment(altFolder);
         });
       } else {
         // Download as mp4 if possible
@@ -129,7 +136,7 @@ class DownloadController {
         video.on('info', function(info) {
           // Set file name
           ext = info.ext;
-          let title = info.title.slice(0,80);
+          let title = info.title.slice(0,50);
           DLFile = `${title.replace(/\s/g, '_')}.${ext}`;
 
           // If no title use the ID
