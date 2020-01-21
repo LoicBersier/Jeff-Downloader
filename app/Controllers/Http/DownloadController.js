@@ -40,8 +40,14 @@ class DownloadController {
       }
       return 0;
     }).slice(0, 5)
-
     
+    // Save space by deleting file that doesn't appear in the recent feed 
+    for (let f of fs.readdirSync('./public/uploads')) {
+      if (!file.includes(f) && (f != 'hidden' && f != '.keep')) {
+        fs.unlinkSync(`./public/uploads/${f}`);
+      }
+    }
+
     for (let f of file) {      
       if (f.endsWith('.mp4') || f.endsWith('.webm')) {
         // Send file name, file size in MB relative path for the file
