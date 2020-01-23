@@ -151,7 +151,7 @@ class DownloadController {
           if (data.feed == 'on') 
             DLFile = `hidden/${title.replace(/\s/g, '_')}.${ext}`;
 
-          DLFile = DLFile.replace(/[()]/g, '_');
+          DLFile = DLFile.replace(/[()]|[/]|[\\]/g, '_');
           video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
         });
 
