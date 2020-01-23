@@ -12,6 +12,19 @@ let announcementArray = ['Twitter download seems to work fine now!', 'u lookin h
 let announcement
 let title = `le epic downloader v${version}`;
 
+
+function formatBytes(bytes, decimals = 2) { // https://stackoverflow.com/a/18650828
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 class DownloadController {
 
   async index ({ view, response }) {
@@ -51,10 +64,10 @@ class DownloadController {
     for (let f of file) {      
       if (f.endsWith('.mp4') || f.endsWith('.webm')) {
         // Send file name, file size in MB relative path for the file
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: (fs.statSync(`./public/uploads/${f}`).size / 1000000.0).toFixed(2), location: `uploads/${f}`, ext: f.split('.').pop(), img: '' });
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: formatBytes(fs.statSync(`./public/uploads/${f}`).size), location: `uploads/${f}`, ext: f.split('.').pop(), img: '' });
       } else if (f.endsWith('.mp3') || f.endsWith('.flac')) {
         // Send file name, file size in MB relative path for the file and relative path of music.png
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: (fs.statSync(`./public/uploads/${f}`).size / 1000000.0).toFixed(2), location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: formatBytes(fs.statSync(`./public/uploads/${f}`).size), location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
       }
     }
 		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement });
