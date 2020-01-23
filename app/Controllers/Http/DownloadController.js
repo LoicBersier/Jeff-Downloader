@@ -127,7 +127,7 @@ class DownloadController {
         let video = youtubedl(data.url, ['--format=mp4', '-f', option]);
 
         video.on('error', function(err) {
-          console.error(err);
+          //console.error(err);
           return view.render(page, {
             title: title,
             viewCounter: viewCounter,
@@ -144,15 +144,15 @@ class DownloadController {
           ext = info.ext;
           let title = info.title.slice(0,50);
           DLFile = `${title.replace(/\s/g, '_')}.${ext}`;
+          DLFile = DLFile.replace(/[()]|[/]|[\\]/g, '_');
 
           // If no title use the ID
           if (title == '_') title = `_${info.id}`;
           // If user want to hide from the feed 
           if (data.feed == 'on') 
-            DLFile = `hidden/${title.replace(/\s/g, '_')}.${ext}`;
+            DLFile = `hidden/${title}.${ext}`;
 
-          DLFile = DLFile.replace(/[()]|[/]|[\\]/g, '_');
-          video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
+            video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
         });
 
         video.on('end', function() {
