@@ -110,14 +110,15 @@ class DownloadController {
   
         return youtubedl.exec(data.url, ['--format=mp4', '-o', altFolder], {}, function(err, output) {
           if (err) {
-            return view.render(page, {
+            console.error(err);
+            return response.send(view.render(page, {
               title: title,
               viewCounter: viewCounter,
               file: files,
               day: day, month: month, announcement: announcement ,
               error: true,
-              errormsg: 'bruh moment, you didin\'t input a valid link.'
-            });
+              errormsg: err
+            }));
           }
   
           return response.attachment(altFolder);
@@ -127,15 +128,15 @@ class DownloadController {
         let video = youtubedl(data.url, ['--format=mp4', '-f', option]);
 
         video.on('error', function(err) {
-          //console.error(err);
-          return view.render(page, {
+          console.error(err);
+          return response.send(view.render(page, {
             title: title,
             viewCounter: viewCounter,
             file: files,
             day: day, month: month, announcement: announcement ,
             error: true,
-            errormsg: 'bruh moment, you didin\'t input a valid link.'
-          });
+            errormsg: err
+          }));
       })
 
         let ext;
