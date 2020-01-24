@@ -40,7 +40,7 @@ class DownloadController {
     day = today.getDay();
     month = today.getMonth();
     // If legacy link return
-    if (request.url == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
+    if (request.url() == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
     
     files = [];
     let file = [];
