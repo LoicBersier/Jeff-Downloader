@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ title }} (legacy)" />
+    <meta property="og:title" content="{{ antl.formatMessage('messages.title') }} v{{ version }} (legacy)" />
     <meta property="og:description" content="A simple video downloader without any ad or tracking." />
     <meta property="og:url" content="https://namejeff.xyz/" />
     <meta property="og:image" content="https://namejeff.xyz/asset/jeff.png" />
@@ -13,7 +13,7 @@
     <link rel="icon" href="/asset/favicon.ico" type="image/x-icon"/>
     <link rel="shortcut icon" href="/asset/favicon.ico" type="image/x-icon"/>
     <link rel="stylesheet" type="text/css" href="/css/legacy.css">
-    <title>{{ title }}  (legacy)</title>
+    <title>{{ antl.formatMessage('messages.title') }} v{{ version }}  (legacy)</title>
 </head>
 <body>
     @if(announcement || (day == '24' || day == '25') && month == '11')
@@ -26,7 +26,7 @@
     </div>
    @endif 
     <div class="downloader">
-        <h1 class="title">{{ title }}  (legacy)</h1>
+        <h1 class="title">{{ antl.formatMessage('messages.title') }} v{{ version }}  (legacy)</h1>
         <form name="download-form" method="POST" action="/legacy">
         {{ csrfField() }}
         <label for="small">{{ antl.formatMessage('messages.LQ') }}</label>
