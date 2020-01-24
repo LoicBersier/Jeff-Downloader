@@ -3,14 +3,15 @@ const youtubedl = require('youtube-dl')
 const fs = require('fs')
 const ffmpeg = require('fluent-ffmpeg')
 const { version } = require('../../../package.json');
+const Antl = use('Antl')
 
 let viewCounter = 0;
 let files = [];
 let day;
 let month;
-let announcementArray = ['Twitter download seems to work fine now!', 'u lookin hot today vro', 'I am not responsible for what you download', 'If you want to support me you can donate through my paypal at the bottom of the page', 'Did you know this website is open source?', 'Did you know this website can download from other website than youtube?', 'You can mouse hover a video to see a preview of it!']
-let announcement
 let title = `le epic downloader v${version}`;
+let announcementArray;
+let announcement
 
 
 function formatBytes(bytes, decimals = 2) { // https://stackoverflow.com/a/18650828
@@ -27,16 +28,19 @@ function formatBytes(bytes, decimals = 2) { // https://stackoverflow.com/a/18650
 
 class DownloadController {
 
-  async index ({ view, response }) {
+  async index ({ view, request, locale }) {
     viewCounter++;
+    // Coudln't find a cleaner way to make it change with the browser locale
+    announcementArray = [Antl.forLocale(locale).formatMessage('announcement.1'), Antl.forLocale(locale).formatMessage('announcement.2'), Antl.forLocale(locale).formatMessage('announcement.3'), Antl.forLocale(locale).formatMessage('announcement.4'), Antl.forLocale(locale).formatMessage('announcement.5'), Antl.forLocale(locale).formatMessage('announcement.6')];
     // Get random announcement
     announcement = announcementArray[Math.floor(Math.random() * announcementArray.length)];
+
     // Get date for some event
     let today = new Date();
     day = today.getDay();
     month = today.getMonth();
     // If legacy link return
-    if (response.request.url == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
+    if (request.url == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
     
     files = [];
     let file = [];
@@ -70,7 +74,7 @@ class DownloadController {
         files.push({ name: f.split('.').slice(0, -1).join('.'), size: formatBytes(fs.statSync(`./public/uploads/${f}`).size), location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
       }
     }
-		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement });
+		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement});
   }
 
   async download({ view, request, response }) {

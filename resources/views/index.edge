@@ -24,12 +24,12 @@
                 @if(announcement || (day == '24' || day == '25') && month == '11')
                 <div class="message is-info">
                     <div class="message-header">
-                        Announcement
+                        {{ antl.formatMessage('messages.announcement') }}
                         <button class="delete" onclick="fadeout('announcement')"></button>
                     </div>
                     <div class="message-body">
                         @if((day == '24' || day == '25') && month == '11')
-                        <p class="title">Happy Christmas!</p>
+                        <p class="title">{{ antl.formatMessage('messages.eggXmas') }}</p>
                         @endif
                         <p class="subtitle">{{ announcement }}</p>
                     </div>
@@ -52,22 +52,22 @@
                                 <div class="control">
                                     <label class="radio" for="small">
                                         <input class="radio" type="radio" name="quality" id="small" value="small">                                
-                                        Low quality
+                                        {{ antl.formatMessage('messages.LQ') }}
                                     </label>
                                 
                                     <label class="radio" for="high">
                                         <input class="radio" type="radio" name="quality" id="high" value="high" checked>                                
-                                        High quality
+                                        {{ antl.formatMessage('messages.HQ') }}
                                     </label>
                                 
                                     <label class="checkbox" for="alt">
                                         <input class="checkbox" type="checkbox" name="alt" id="alt" title="Use this if download dosen't work">
-                                        Alternate download?
+                                        {{ antl.formatMessage('messages.altDL') }}
                                     </label>
     
                                     <label class="checkbox" for="feed">
                                         <input class="checkbox" type="checkbox" name="feed" id="feed" title="Use this if you don't want the video you are downloading to be public">
-                                        Hide from feed?
+                                        {{ antl.formatMessage('messages.feed') }}
                                     </label>
                                 </div>
                             </div>
@@ -81,7 +81,7 @@
                                     <input type="text" id="URL" name="URL" class="downloadurl input is-rounded" placeholder="Link">
                                 </p>
                                 <p class="control">
-                                    <button type="button" class="downloadbtn button is-primary is-rounded" id="button" onclick="submitDownload()">Download that mf video</button>
+                                    <button type="button" class="downloadbtn button is-primary is-rounded" id="button" onclick="submitDownload()">{{ antl.formatMessage('messages.download') }}</button>
                                 </p>
                               </div>
                             </div>
@@ -133,7 +133,7 @@
     </section>
 
     @if(file != "")
-    <p class="title has-text-light has-text-centered">Recently downloaded videos</p> 
+    <p class="title has-text-light has-text-centered">{{ antl.formatMessage('messages.recentFeed') }}</p> 
     <section class="section">
         <div class="columns is-vcentered is-multiline fadein">
             @each(file in file)
@@ -150,23 +150,23 @@
                     <div class="content">
                         <div class="field has-addons is-centered">
                             <p class="control">
-                                <a class="button is-link is-rounded" href="{{ file.location }}" download>Download<i class="fas fa-fw fa-file-download" aria-hidden="true"></i></a>
+                                <a class="button is-link is-rounded" href="{{ file.location }}" download>{{ antl.formatMessage('messages.recentDownload') }}<i class="fas fa-fw fa-file-download" aria-hidden="true"></i></a>
                             </p>
                             <p class="control"> 
-                                <button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">Add to clipboard<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button>
+                                <button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">{{ antl.formatMessage('messages.recentCopy') }}<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button>
                             </p>
                         </div>
                     </div>
                     <div class="field is-grouped">
                         <div class="control">
                             <div class="tags has-addons">
-                                <span class="tag">File format</span>
+                                <span class="tag">{{ antl.formatMessage('messages.recentFormat') }}</span>
                                 <span class="tag is-primary">{{ file.ext }}</span>
                             </div>
                         </div>
                         <div class="control">
                             <div class="tags has-addons">
-                                <span class="tag">File size</span>
+                                <span class="tag">{{ antl.formatMessage('messages.recentSize') }}</span>
                                 <span class="tag is-primary">{{ file.size }}</span>
                             </div>
                         </div>
@@ -177,12 +177,11 @@
         </div>
     </section>
     @endif
-
     <footer class="footer has-background-grey-dark has-text-light has-text-centered">
-        <p>I decline any responsabilities for download made using this website.</p>
-        <p>Credit to <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - My other project <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - Numbers of visits: {{ viewCounter }} - Contact Supositware#1616 on Discord if you have any issues</p>
-        <p>You can also support me either on <a href="https://www.paypal.me/supositware">Paypal</a> or by tipping <a href="https://basicattentiontoken.org/">BAT</a> on this website! or using my referal link for <a href="https://brave.com/nam120">Brave Browser </a> 
-        <p><a href="legacy">Legacy version</a></p>
+        <p>{{ antl.formatMessage('messages.footer') }}</p>
+        <p>{{ antl.formatMessage('messages.footer2p1') }} <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - {{ antl.formatMessage('messages.footer2p2') }} <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - {{ antl.formatMessage('messages.footer2p3') }}: {{ viewCounter }} - {{ antl.formatMessage('messages.footer2p4') }} <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> {{ antl.formatMessage('messages.footer2p5') }}</p>
+        <p>{{ antl.formatMessage('messages.footer3p1') }} <a href="https://www.paypal.me/supositware">Paypal</a> {{ antl.formatMessage('messages.footer3p2') }} <a href="https://basicattentiontoken.org/">BAT</a> {{ antl.formatMessage('messages.footer3p3') }} <a href="https://brave.com/nam120">Brave Browser </a> 
+        <p><a href="legacy">{{ antl.formatMessage('messages.footer4') }}</a></p>
     </footer>
     @if(month == '11')
     <script src="JS/snow.js"></script>
@@ -192,7 +191,7 @@
     function submitDownload() {
         let frm = document.getElementsByName('download-form')[0];
         frm.submit();
-        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif"></button>Download started!</div>';
+        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif"></button>{{ antl.formatMessage('messages.dlStart') }}</div>';
         setTimeout(() => {
             fadeout('notif')
         }, 2000);
@@ -212,12 +211,12 @@
         navigator.clipboard.writeText(text)
         .catch(err => {
             console.error(err);
-            document.getElementById('msg').innerHTML = '<div class="notification is-error fadein" id="notif">An error has occured while copying the link to your clipboard.</div>';
+            document.getElementById('msg').innerHTML = '<div class="notification is-error fadein" id="notif">{{ antl.formatMessage('messages.errorCopy') }}</div>';
             setTimeout(() => {
                 fadeout('notif')                
             }, 2000);
         });
-        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif">Success fully copied link to your clipboard!</div>';
+        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif">{{ antl.formatMessage('messages.successCopy') }}</div>';
         setTimeout(() => {
             fadeout('notif')
         }, 2000);
