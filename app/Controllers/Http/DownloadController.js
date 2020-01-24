@@ -9,7 +9,6 @@ let viewCounter = 0;
 let files = [];
 let day;
 let month;
-let title = `le epic downloader v${version}`;
 let announcementArray;
 let announcement
 
@@ -40,7 +39,7 @@ class DownloadController {
     day = today.getDay();
     month = today.getMonth();
     // If legacy link return
-    if (request.url() == '/legacy') return view.render('legacy', { title: title, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
+    if (request.url() == '/legacy') return view.render('legacy', { version: version, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
     
     files = [];
     let file = [];
@@ -74,7 +73,7 @@ class DownloadController {
         files.push({ name: f.split('.').slice(0, -1).join('.'), size: formatBytes(fs.statSync(`./public/uploads/${f}`).size), location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
       }
     }
-		return view.render('index', { title: title, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement});
+		return view.render('index', { version: version, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement});
   }
 
   async download({ view, request, response }) {
