@@ -12,3 +12,5 @@ Major Tom#6196 for AR translation
 0nion_man_LV#6572 for LV translation
 
 Mastah Gengu#1596 for DE translation
+
+МeiYali#2457 for CS translation
