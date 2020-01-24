@@ -179,7 +179,7 @@
     @endif
     <footer class="footer has-background-grey-dark has-text-light has-text-centered">
         <p>{{ antl.formatMessage('messages.footer') }}</p>
-        @if(antl._locale == 'ar')
+        @if(antl._locale == 'ar') <!-- bdi support -->
         <bdi><p>{{ antl.formatMessage('messages.footer2p1') }} <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - {{ antl.formatMessage('messages.footer2p2') }} <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - {{ antl.formatMessage('messages.footer2p3') }}: {{ viewCounter }} - {{ antl.formatMessage('messages.footer2p4') }} <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> {{ antl.formatMessage('messages.footer2p5') }} </bdi></p>
         <bdi><p>{{ antl.formatMessage('messages.footer3p1') }} <a href="https://www.paypal.me/supositware">Paypal</a> {{ antl.formatMessage('messages.footer3p2') }} <a href="https://basicattentiontoken.org/">BAT</a> {{ antl.formatMessage('messages.footer3p3') }} <a href="https://brave.com/nam120">Brave Browser </a> </bdi>
         @else
