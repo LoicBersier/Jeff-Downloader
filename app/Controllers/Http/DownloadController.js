@@ -96,7 +96,7 @@ class DownloadController {
 
       if (!data.url) {
         return view.render(page, {
-          title: title,
+          version: version,
           viewCounter: viewCounter,
           file: files,
           day: day, month: month, announcement: announcement ,
@@ -130,7 +130,7 @@ class DownloadController {
           if (err) {
             console.error(err);
             return response.send(view.render(page, {
-              title: title,
+              version: version,
               viewCounter: viewCounter,
               file: files,
               day: day, month: month, announcement: announcement ,
@@ -148,7 +148,7 @@ class DownloadController {
         video.on('error', function(err) {
           console.error(err);
           return response.send(view.render(page, {
-            title: title,
+            version: version,
             viewCounter: viewCounter,
             file: files,
             day: day, month: month, announcement: announcement ,
