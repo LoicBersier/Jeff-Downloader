@@ -64,13 +64,15 @@ class DownloadController {
       }
     }
 
-    for (let f of file) {      
+    for (let f of file) {   
       if (f.endsWith('.mp4') || f.endsWith('.webm')) {
         // Send file name, file size in MB relative path for the file
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: formatBytes(fs.statSync(`./public/uploads/${f}`).size), location: `uploads/${f}`, ext: f.split('.').pop(), img: '' });
+        let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], location: `uploads/${f}`, ext: f.split('.').pop(), img: '' });
       } else if (f.endsWith('.mp3') || f.endsWith('.flac')) {
         // Send file name, file size in MB relative path for the file and relative path of music.png
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: formatBytes(fs.statSync(`./public/uploads/${f}`).size), location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
+        let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
       }
     }
 		return view.render('index', { version: version, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement});
