@@ -167,7 +167,7 @@
                         <div class="control">
                             <div class="tags has-addons">
                                 <span class="tag">{{ antl.formatMessage('messages.recentSize') }}</span>
-                                <span class="tag is-primary">{{ file.size }}</span>
+                                <span class="tag is-primary">{{ antl.formatNumber(file.size) }} {{ file.unit }}</span>
                             </div>
                         </div>
                     </div>
