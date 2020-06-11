@@ -13,11 +13,25 @@
     <link rel="icon" href="/asset/favicon.ico" type="image/x-icon"/>
     <link rel="shortcut icon" href="asset/favicon.ico" type="image/x-icon"/>
     <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/background.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <title>{{ antl.formatMessage('messages.title') }} v{{ version }}</title>
 </head>
-<body class="gradientBG has-text-light">
+<body class="gradientBG area  has-text-light">
+     <ul class="circles">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+     </ul>
+
     <header>
         <section class="section" id="announcement">
             <div class="container">
@@ -33,7 +47,7 @@
                         @endif
                         <p class="subtitle">{{ announcement }}</p>
                     </div>
-                </div>  
+                </div>
                 @endif
             </div>
         </section>
@@ -42,29 +56,29 @@
     <section class="section has-text-centered">
         <div class="container ">
                 <div class="downloader form">
-                    <h1 class="title has-text-light">{{ antl.formatMessage('messages.title') }} v{{ version }}</h1>
+                    <h1 class="title has-text-light"><a style="color: white" href="/">{{ antl.formatMessage('messages.title') }} v{{ version }}</a></h1>
                     <form name="download-form" method="POST" action="/">
                     {{ csrfField() }}
-            
-                    <div class="field is-horizontal">
-                        <div class="field-body">
+
+                    <div class="field ">
+                        <div class="field-body is-horizontal">
                             <div class="field is-horizontal">
                                 <div class="control">
                                     <label class="radio" for="small">
-                                        <input class="radio" type="radio" name="quality" id="small" value="small">                                
+                                        <input class="radio" type="radio" name="quality" id="small" value="small">
                                         {{ antl.formatMessage('messages.LQ') }}
                                     </label>
-                                
+
                                     <label class="radio" for="high">
-                                        <input class="radio" type="radio" name="quality" id="high" value="high" checked>                                
+                                        <input class="radio" type="radio" name="quality" id="high" value="high" checked>
                                         {{ antl.formatMessage('messages.HQ') }}
                                     </label>
-                                
+
                                     <label class="checkbox" for="alt">
                                         <input class="checkbox" type="checkbox" name="alt" id="alt" title="Use this if download dosen't work">
                                         {{ antl.formatMessage('messages.altDL') }}
                                     </label>
-    
+
                                     <label class="checkbox" for="feed">
                                         <input class="checkbox" type="checkbox" name="feed" id="feed" title="Use this if you don't want the video you are downloading to be public">
                                         {{ antl.formatMessage('messages.feed') }}
@@ -72,8 +86,8 @@
                                 </div>
                             </div>
                         </div>
-                    </div>  
-                    
+                    </div>
+
                     <div class="field-body">
                             <div class="field is-expanded">
                               <div class="field has-addons">
@@ -86,15 +100,18 @@
                               </div>
                             </div>
                           </div>
-    
-    
+
+
                     <div class="field has-addon">
                         <div class="control">
                         </div>
                         <div class="control">
                         </div>
                     </div>
-    
+
+                    <div id="progression"></div>
+                    <br>
+
                     <div class="field is-horizontal">
                             <div class="field-body">
                                 <div class="field is-horizontal">
@@ -103,12 +120,12 @@
                                             <input class="radio" type="radio" name="format" value="mp4" id="mp4" checked>
                                             Video?
                                         </label>
-                                    
+
                                         <label class="radio" for="mp3">
                                             <input class="radio" type="radio" name="format" value="mp3" id="mp3">
                                             MP3?
                                         </label>
-                                    
+
                                         <label class="radio" for="flac">
                                             <input class="radio" type="radio" name="format" value="flac" id="flac">
                                             FLAC?
@@ -116,11 +133,12 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>  
+                        </div>
                     </form>
-                    
-                    <div class="contaianer">
-                        <div id="msg"></div>                
+
+                    <div class="container">
+                        <div id="msg"></div>
+
                         @if(error)
                         <div class="notification is-danger fadein" id="error">
                             <button class="delete" onclick="fadeout('error')"></button>
@@ -133,7 +151,7 @@
     </section>
 
     @if(file != "")
-    <p class="title has-text-light has-text-centered">{{ antl.formatMessage('messages.recentFeed') }}</p> 
+    <p class="title has-text-light has-text-centered">{{ antl.formatMessage('messages.recentFeed') }}</p>
     <section class="section">
         <div class="columns is-vcentered is-multiline fadein">
             @each(file in file)
@@ -152,7 +170,7 @@
                             <p class="control">
                                 <a class="button is-link is-rounded" href="{{ file.location }}" download>{{ antl.formatMessage('messages.recentDownload') }}<i class="fas fa-fw fa-file-download" aria-hidden="true"></i></a>
                             </p>
-                            <p class="control"> 
+                            <p class="control">
                                 <button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">{{ antl.formatMessage('messages.recentCopy') }}<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button>
                             </p>
                         </div>
@@ -185,29 +203,39 @@
     @endif
     <footer class="footer has-background-grey-dark has-text-light has-text-centered">
         <p>{{ antl.formatMessage('messages.footer') }}</p>
-        @if(antl._locale == 'ar') 
+        @if(antl._locale == 'ar')
         <bdi><p>{{ antl.formatMessage('messages.footer2p1') }} <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - {{ antl.formatMessage('messages.footer2p2') }} <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - {{ antl.formatMessage('messages.footer2p3') }}: {{ viewCounter }} - {{ antl.formatMessage('messages.footer2p4') }} <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> {{ antl.formatMessage('messages.footer2p5') }} </bdi></p>
         <bdi><p>{{ antl.formatMessage('messages.footer3p1') }} <a href="https://www.paypal.me/supositware">Paypal</a> {{ antl.formatMessage('messages.footer3p2') }} <a href="https://basicattentiontoken.org/">BAT</a> {{ antl.formatMessage('messages.footer3p3') }} <a href="https://brave.com/nam120">Brave Browser </a> </bdi>
         @else
         <p>{{ antl.formatMessage('messages.footer2p1') }} <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - {{ antl.formatMessage('messages.footer2p2') }} <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - {{ antl.formatMessage('messages.footer2p3') }}: {{ viewCounter }} - {{ antl.formatMessage('messages.footer2p4') }} <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> {{ antl.formatMessage('messages.footer2p5') }}</p>
-        <p>{{ antl.formatMessage('messages.footer3p1') }} <a href="https://www.paypal.me/supositware">Paypal</a> {{ antl.formatMessage('messages.footer3p2') }} <a href="https://basicattentiontoken.org/">BAT</a> {{ antl.formatMessage('messages.footer3p3') }} <a href="https://brave.com/nam120">Brave Browser </a> 
+        <p>{{ antl.formatMessage('messages.footer3p1') }} <a href="https://www.paypal.me/supositware">Paypal</a> {{ antl.formatMessage('messages.footer3p2') }} <a href="https://basicattentiontoken.org/">BAT</a> {{ antl.formatMessage('messages.footer3p3') }} <a href="https://brave.com/nam120">Brave Browser </a>
         @endif
         <p><a href="legacy">{{ antl.formatMessage('messages.footer4') }}</a></p>
     </footer>
     @if(month == '11')
     <script src="JS/snow.js"></script>
     @endif
+    <script src="JS/tis.min.js"></script>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.4/polyfill.min.js"></script>
+<script src="https://unpkg.com/@adonisjs/websocket-client"></script>
 <script>
+    const ws = adonis.Ws();
+
     function submitDownload() {
-        let frm = document.getElementsByName('download-form')[0];
-        frm.submit();
         document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif"></button>{{ antl.formatMessage('messages.dlStart') }}</div>';
         setTimeout(() => {
             fadeout('notif')
         }, 2000);
-        frm.reset();
-        return false;
+
+        FD  = new FormData(document.getElementsByName('download-form')[0]);
+
+        fetch('/', {
+            method: 'POST',
+            body: FD
+        });
+
+        document.getElementById('progression').innerHTML = '<progress class="progress is-primary" max="100" id="progress">0%</progress>'
     }
 
     function fadeout(id) {
@@ -224,14 +252,15 @@
             console.error(err);
             document.getElementById('msg').innerHTML = '<div class="notification is-error fadein" id="notif">{{ antl.formatMessage('messages.errorCopy') }}</div>';
             setTimeout(() => {
-                fadeout('notif')                
-            }, 2000);
+                fadeout('notif')
+            }, 5000);
         });
         document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif">{{ antl.formatMessage('messages.successCopy') }}</div>';
         setTimeout(() => {
             fadeout('notif')
-        }, 2000);
+        }, 5000);
     }
+    
     // If alt download block other settings since they don't work anyway
     document.getElementById('alt').onclick = function() {
         if(document.getElementById('alt').checked) {
@@ -251,7 +280,7 @@
         }
     }
 
-    // If user press enter do samething as if pressing the button
+    // If user press enter do same thing as if pressing the button
     let input = document.getElementById("URL");
     input.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
@@ -259,5 +288,39 @@
             document.getElementById("button").click();
         }
     });
+
+
+    ws.connect();
+    let channel = ws.subscribe('progress')
+
+    ws.on('open', () => {
+        console.log('is open');
+    });
+
+    ws.on('close', () => {
+        console.log('is closed');
+    });
+
+    channel.on('progress', (message) => {
+        document.getElementById('progress').innerHTML = message + '%';
+        document.getElementById('progress').value = message;
+    });
+
+    channel.on('error', (message) => {
+        console.log(message);
+        document.getElementById('msg').innerHTML = '<div class="notification is-danger fadein" id="error">' + message + '</div>';
+        setTimeout(() => {
+            fadeout('error')
+        }, 5000);
+    });
+
+    channel.on('end', (message) => {
+        link = document.createElement("a");
+        link.setAttribute("href", message); //replace "file" with link to file you want to download
+        link.setAttribute("download", message);// replace "file" here too
+        link.click(); //virtually click <a> element to initiate download
+        document.getElementById('progression').innerHTML = '';
+    });
+
 </script>
 </html>
