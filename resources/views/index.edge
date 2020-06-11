@@ -65,12 +65,12 @@
                             <div class="field is-horizontal">
                                 <div class="control">
                                     <label class="radio" for="small">
-                                        <input class="radio" type="radio" name="quality" id="small" value="small">
+                                        <input class="radio" type="radio" name="quality" id="small" value="worst">
                                         {{ antl.formatMessage('messages.LQ') }}
                                     </label>
 
                                     <label class="radio" for="high">
-                                        <input class="radio" type="radio" name="quality" id="high" value="high" checked>
+                                        <input class="radio" type="radio" name="quality" id="high" value="best" checked>
                                         {{ antl.formatMessage('messages.HQ') }}
                                     </label>
 
@@ -221,77 +221,8 @@
 <script src="https://unpkg.com/@adonisjs/websocket-client"></script>
 <script>
     const ws = adonis.Ws();
-
-    function submitDownload() {
-        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif"></button>{{ antl.formatMessage('messages.dlStart') }}</div>';
-        setTimeout(() => {
-            fadeout('notif')
-        }, 2000);
-
-        FD  = new FormData(document.getElementsByName('download-form')[0]);
-
-        fetch('/', {
-            method: 'POST',
-            body: FD
-        });
-
-        document.getElementById('progression').innerHTML = '<progress class="progress is-primary" max="100" id="progress">0%</progress>'
-    }
-
-    function fadeout(id) {
-        document.getElementById(id).classList.add('fadeout');
-        setTimeout(() => {
-            let element = document.getElementById(id);
-            element.parentNode.removeChild(element);
-        }, 2000);
-    }
-
-    function toClipboard(text) {
-        navigator.clipboard.writeText(text)
-        .catch(err => {
-            console.error(err);
-            document.getElementById('msg').innerHTML = '<div class="notification is-error fadein" id="notif">{{ antl.formatMessage('messages.errorCopy') }}</div>';
-            setTimeout(() => {
-                fadeout('notif')
-            }, 5000);
-        });
-        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif">{{ antl.formatMessage('messages.successCopy') }}</div>';
-        setTimeout(() => {
-            fadeout('notif')
-        }, 5000);
-    }
-    
-    // If alt download block other settings since they don't work anyway
-    document.getElementById('alt').onclick = function() {
-        if(document.getElementById('alt').checked) {
-            document.getElementById('small').disabled = true;
-            document.getElementById('small').checked = false;
-
-            document.getElementById('mp3').disabled = true;
-            document.getElementById('mp3').checked = false;
-            document.getElementById('flac').disabled = true;
-            document.getElementById('flac').checked = false;
-            document.getElementById('mp4').checked = true;
-            document.getElementById('high').checked = true;
-        } else {
-            document.getElementById('small').disabled = false;
-            document.getElementById('mp3').disabled = false;
-            document.getElementById('flac').disabled = false;
-        }
-    }
-
-    // If user press enter do same thing as if pressing the button
-    let input = document.getElementById("URL");
-    input.addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            document.getElementById("button").click();
-        }
-    });
-
-
     ws.connect();
-    let channel = ws.subscribe('progress')
+    let channel = ws.subscribe('progress');
 
     ws.on('open', () => {
         console.log('is open');
@@ -315,12 +246,84 @@
     });
 
     channel.on('end', (message) => {
+        let frm = document.getElementsByName('download-form')[0];
+        frm.reset();
+
         link = document.createElement("a");
-        link.setAttribute("href", message); //replace "file" with link to file you want to download
-        link.setAttribute("download", message);// replace "file" here too
+        link.setAttribute("href", message.substring(9));
+        if (message.includes('/hidden/')) {
+            link.setAttribute("download", message.substring(24));
+        } else {
+            link.setAttribute("download", message.substring(17));
+        }
         link.click(); //virtually click <a> element to initiate download
         document.getElementById('progression').innerHTML = '';
     });
 
+    async function submitDownload() {
+        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif"></button>{{ antl.formatMessage('messages.dlStart') }}</div>';
+        setTimeout(() => {
+            fadeout('notif')
+        }, 2000);
+
+        FD  = new FormData(document.getElementsByName('download-form')[0]);
+        fetch('/', {
+            method: 'POST',
+            body: FD
+        });
+
+        document.getElementById('progression').innerHTML = '<progress class="progress is-primary" max="100" id="progress">0%</progress>'
+    }
+
+    async function fadeout(id) {
+        document.getElementById(id).classList.add('fadeout');
+        setTimeout(() => {
+            let element = document.getElementById(id);
+            element.parentNode.removeChild(element);
+        }, 2000);
+    }
+
+    async function toClipboard(text) {
+        navigator.clipboard.writeText(text)
+        .catch(err => {
+            console.error(err);
+            document.getElementById('msg').innerHTML = '<div class="notification is-error fadein" id="notif">{{ antl.formatMessage('messages.errorCopy') }}</div>';
+            setTimeout(() => {
+                fadeout('notif')
+            }, 5000);
+        });
+        document.getElementById('msg').innerHTML = '<div class="notification is-success fadein" id="notif">{{ antl.formatMessage('messages.successCopy') }}</div>';
+        setTimeout(() => {
+            fadeout('notif')
+        }, 5000);
+    }
+    
+    // If alt download block other settings since they don't work anyway
+    document.getElementById('alt').onclick = async function() {
+        if(document.getElementById('alt').checked) {
+            document.getElementById('small').disabled = true;
+            document.getElementById('small').checked = false;
+
+            document.getElementById('mp3').disabled = true;
+            document.getElementById('mp3').checked = false;
+            document.getElementById('flac').disabled = true;
+            document.getElementById('flac').checked = false;
+            document.getElementById('mp4').checked = true;
+            document.getElementById('high').checked = true;
+        } else {
+            document.getElementById('small').disabled = false;
+            document.getElementById('mp3').disabled = false;
+            document.getElementById('flac').disabled = false;
+        }
+    }
+
+    // If user press enter do same thing as if pressing the button
+    let input = document.getElementById("URL");
+    input.addEventListener("keyup", async function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("button").click();
+        }
+    });
 </script>
 </html>

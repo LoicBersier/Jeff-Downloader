@@ -100,12 +100,6 @@ class DownloadController {
         return;
       }
 
-      // Youtube-dl quality settings
-      if (data.quality == 'small')
-        option = 'worst'
-      else
-        option = 'best'
-
       // If alt download ( Quality settings and file format option doesn't work here )
       if (data.alt) {
         let altFolder;
@@ -133,86 +127,83 @@ class DownloadController {
           if (ws) {
             ws.socket.emit('end', altFolder.slice(17));
           }
-          return;
         });
       } else {
         if (data.url.match( /^.*(youtu.be\/|list=)([^#\&\?]*).*/)) {
-          playlistDownload(data)
+          playlistDownload(data);
         } else {
-          // Download as mp4 if possible
-          let video = youtubedl(data.url, ['--format=mp4', '-f', option]);
-
-          video.on('error', function(err) {
-            console.error(err);
-            if (ws) {
-              ws.socket.emit('error', err.toString());
-            }
-            return;
-          })
-
-          let ext;
-          let size = 0
-          video.on('info', function(info) {
-            size = info.size
-            // Set file name
-            ext = info.ext;
-            let title = info.title.slice(0,50);
-            DLFile = `${title.replace(/\s/g, '_')}.${ext}`;
-            DLFile = DLFile.replace(/[()]|[/]|[\\]|[?]|[!]/g, '_');
-
-            // If no title use the ID
-            if (title == '_') title = `_${info.id}`;
-            // If user want to hide from the feed
-            if (data.feed == 'on')
-            DLFile = `hidden/${title}.${ext}`;
-
-            video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
-          });
-
-          let pos = 0
-          video.on('data', function data(chunk) {
-            pos += chunk.length
-            // `size` should not be 0 here.
-            if (size) {
-              let percent = (pos / size * 100).toFixed(2)
-              if (ws) {
-                ws.socket.emit('progress', percent);
-              }
-            }
-          })
-
-          video.on('end', function() {
-            console.log('end');
-            if (ws) {
-              ws.socket.emit('message', 'end');
-            }
-            if (data.format == 'mp4' || data.format == 'webm') {
-              // If user requested mp4 directly attach the file
-              if (ws) {
-                ws.socket.emit('end', DLFile);
-              }
-              return;
-            } else {
-              // If user requested an audio format, convert it
-              ffmpeg(`./public/uploads/${DLFile}`)
-              .noVideo()
-              .audioChannels('2')
-              .audioFrequency('44100')
-              .audioBitrate('320k')
-              .format(data.format)
-              .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
-              .on('progress', (progress) => {
-                wb.broadcast(progress.percent)
-              })
-              .on('end', () => {
-                fs.unlinkSync(`./public/uploads/${DLFile}`);
-                if (ws) {
-                  ws.socket.emit('end', DLFile.replace(`.${ext}`, `.${data.format}`));
-                }
-              });
-            }
-          });
+          videoDownload(data);
         }
+
+      }
+
+      function videoDownload(data) {
+        // Download as mp4 if possible
+        let video = youtubedl(data.url, ['-f', data.quality]);
+
+        video.on('error', function(err) {
+          console.error(err);
+          if (ws) {
+            ws.socket.emit('error', err.toString());
+          }
+        })
+        
+        let ext;
+        let size = 0
+        video.on('info', function(info) {
+          size = info.size
+          // Set file name
+          ext = info.ext;
+          let title = info.title.slice(0,50);
+          DLFile = `${title.replace(/\s/g, '_')}.${ext}`;
+          DLFile = DLFile.replace(/[()]|[/]|[\\]|[?]|[!]|[#]/g, '_');
+        
+          // If no title use the ID
+          if (title == '_') title = `_${info.id}`;
+          // If user want to hide from the feed
+          if (data.feed == 'on')
+            DLFile = `hidden/${DLFile}`;
+        
+          video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
+        });
+        
+        let pos = 0
+        video.on('data', function data(chunk) {
+          pos += chunk.length
+          // `size` should not be 0 here.
+          if (size) {
+            let percent = (pos / size * 100).toFixed(2)
+            if (ws) {
+              ws.socket.emit('progress', percent);
+            }
+          }
+        })
+        
+        video.on('end', function() {
+          if (data.format == 'mp3' || data.format == 'flac') {
+            // If user requested an audio format, convert it
+            ffmpeg(`./public/uploads/${DLFile}`)
+            .noVideo()
+            .audioChannels('2')
+            .audioFrequency('44100')
+            .audioBitrate('320k')
+            .format(data.format)
+            .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
+            .on('progress', (progress) => {
+              ws.socket.emit(progress.percent)
+            })
+            .on('end', () => {
+              fs.unlinkSync(`./public/uploads/${DLFile}`);
+              if (ws) {
+                ws.socket.emit('end', `./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
+              }
+            });
+          } else {
+            if (ws) {
+              ws.socket.emit('end', `./public/uploads/${DLFile}`);
+            }
+          }
+        });
       }
 
       function playlistDownload(data) {
@@ -223,7 +214,6 @@ class DownloadController {
           if (ws) {
             ws.socket.emit('error', err.toString());
           }
-          return;
         });
 
         let ext;
@@ -235,15 +225,16 @@ class DownloadController {
           ext = info.ext;
           let title = info.title.slice(0,50);
           DLFile = `${title.replace(/\s/g, '_')}.${ext}`;
-          DLFile = DLFile.replace(/[()]|[/]|[\\]|[?]|[!]/g, '_');
+          DLFile = DLFile.replace(/[()]|[/]|[\\]|[?]|[!]|[#]/g, '_');
 
           // If no title use the ID
           if (title == '_') title = `_${info.id}`;
           // If user want to hide from the feed
           if (data.feed == 'on')
-            DLFile = `hidden/playlist/${title}.${ext}`;
+            DLFile = `hidden/playlist/${DLFile}`;
 
-            video.pipe(fs.createWriteStream(`./public/uploads/playlist/${DLFile}`));
+
+          video.pipe(fs.createWriteStream(`./public/uploads/playlist/${DLFile}`));
         });
 
 
