@@ -1,0 +1,11 @@
+[
+  {
+    "ip": "IP:PORT",
+    "country": "Country",
+    "hideip": true (Optional)
+  },
+  {
+    "ip": "IP:PORT",
+    "country": "Country"
+  },
+]
