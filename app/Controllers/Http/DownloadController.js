@@ -30,7 +30,6 @@ function formatBytes(bytes, decimals = 2) { // https://stackoverflow.com/a/18650
 class DownloadController {
 
   async index ({ view, request, locale }) {
-    console.log(defaultViewOption)
     viewCounter++;
     defaultViewOption.viewCounter = viewCounter;
     // Couldn't find a cleaner way to make it change with the browser locale
