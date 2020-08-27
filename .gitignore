@@ -8,6 +8,9 @@ tmp
 # Environment variables, never commit this file
 .env
 
+# List of proxy
+proxy/proxy.json
+
 # The development sqlite file
 database/development.sqlite
 
@@ -29,5 +32,5 @@ public/uploads/hidden/*.mp3
 public/uploads/hidden/*.flac
 
 
-# Thumbnail 
+# Thumbnail
 public/Thumbnail/*.*
