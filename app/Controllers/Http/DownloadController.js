@@ -1,16 +1,18 @@
 'use strict'
-const youtubedl = require('youtube-dl')
-const fs = require('fs')
-const ffmpeg = require('fluent-ffmpeg')
+const youtubedl = require('youtube-dl');
+const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg');
 const { version } = require('../../../package.json');
-const Antl = use('Antl')
+const Antl = use('Antl');
+const proxy = require('../../../proxy/proxy.json')
 
 let viewCounter = 0;
 let files = [];
 let day;
 let month;
 let announcementArray;
-let announcement
+let announcement;
+let defaultViewOption = { version: version, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement, proxy: proxy }
 
 
 function formatBytes(bytes, decimals = 2) { // https://stackoverflow.com/a/18650828
@@ -28,19 +30,21 @@ function formatBytes(bytes, decimals = 2) { // https://stackoverflow.com/a/18650
 class DownloadController {
 
   async index ({ view, request, locale }) {
+    console.log(defaultViewOption)
     viewCounter++;
-    // Coudln't find a cleaner way to make it change with the browser locale
-    announcementArray = [Antl.forLocale(locale).formatMessage('announcement.1'), Antl.forLocale(locale).formatMessage('announcement.2'), Antl.forLocale(locale).formatMessage('announcement.3'), Antl.forLocale(locale).formatMessage('announcement.4'), Antl.forLocale(locale).formatMessage('announcement.5'), Antl.forLocale(locale).formatMessage('announcement.6')];
+    defaultViewOption.viewCounter = viewCounter;
+    // Couldn't find a cleaner way to make it change with the browser locale
+    announcementArray = [Antl.forLocale(locale).formatMessage('announcement.1'), Antl.forLocale(locale).formatMessage('announcement.2'), Antl.forLocale(locale).formatMessage('announcement.3'), Antl.forLocale(locale).formatMessage('announcement.4'), Antl.forLocale(locale).formatMessage('announcement.5'), Antl.forLocale(locale).formatMessage('announcement.6'), Antl.forLocale(locale).formatMessage('announcement.7')];
     // Get random announcement
-    announcement = announcementArray[Math.floor(Math.random() * announcementArray.length)];
+    defaultViewOption.announcement = announcementArray[Math.floor(Math.random() * announcementArray.length)];
 
     // Get date for some event
     let today = new Date();
-    day = today.getDay();
-    month = today.getMonth();
+    defaultViewOption.day = today.getDay();
+    defaultViewOption.month = today.getMonth();
     // If legacy link return
-    if (request.url() == '/legacy') return view.render('legacy', { version: version, viewCounter: viewCounter, day: day, month: month, announcement: announcement});
-    
+    if (request.url() == '/legacy') return view.render('legacy', defaultViewOption);
+
     files = [];
     let file = [];
     for (let f of fs.readdirSync('./public/uploads')) {
@@ -50,21 +54,21 @@ class DownloadController {
     file = file.sort((a, b) => {
       if ((a || b).endsWith('.mp4') || (a || b).endsWith('.webm') || (a || b).endsWith('.mp3') || (a || b).endsWith('.flac')) {
         let time1 = fs.statSync(`./public/uploads/${b}`).ctime;
-        let time2 = fs.statSync(`./public/uploads/${a}`).ctime; 
+        let time2 = fs.statSync(`./public/uploads/${a}`).ctime;
         if (time1 < time2) return -1;
         if (time1 > time2) return 1;
       }
       return 0;
     }).slice(0, 5)
-    
-    // Save space by deleting file that doesn't appear in the recent feed 
+
+    // Save space by deleting file that doesn't appear in the recent feed
     for (let f of fs.readdirSync('./public/uploads')) {
       if (!file.includes(f) && (f != 'hidden' && f != '.keep')) {
         fs.unlinkSync(`./public/uploads/${f}`);
       }
     }
 
-    for (let f of file) {   
+    for (let f of file) {
       if (f.endsWith('.mp4') || f.endsWith('.webm')) {
         // Send file name, file size in MB relative path for the file
         let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
@@ -75,7 +79,8 @@ class DownloadController {
         files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
       }
     }
-		return view.render('index', { version: version, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement});
+    defaultViewOption.file = files;
+		return view.render('index', defaultViewOption);
   }
 
   async download({ view, request, response }) {
@@ -91,18 +96,17 @@ class DownloadController {
         quality: request.input('quality'),
         format: request.input('format'),
         alt: request.input('alt'),
-        feed: request.input('feed')
+        feed: request.input('feed'),
+        proxy: request.input('proxy')
       }
 
+      console.log(data.proxy);
+
       if (!data.url) {
-        return view.render(page, {
-          version: version,
-          viewCounter: viewCounter,
-          file: files,
-          day: day, month: month, announcement: announcement ,
-          error: true,
-          errormsg: 'bruh moment, you didin\'t input a link.'
-        });
+        let viewOption = {...defaultViewOption};
+        viewOption.error = true;
+        viewOption.errormsg = 'bruh moment, you didin\'t input a link.';
+        return view.render(page, viewOption);
       }
 
       // Youtube-dl quality settings
@@ -125,36 +129,40 @@ class DownloadController {
             if (err);
           });
         }
-  
-        return youtubedl.exec(data.url, ['--format=mp4', '-o', altFolder], {}, function(err, output) {
+
+        let options = ['--format=mp4', '-o', altFolder];
+        if (data.proxy !== "none") {
+          options.push('--proxy');
+          options.push(data.proxy);
+        }
+
+        return youtubedl.exec(data.url, options, {}, function(err, output) {
           if (err) {
             console.error(err);
-            return response.send(view.render(page, {
-              version: version,
-              viewCounter: viewCounter,
-              file: files,
-              day: day, month: month, announcement: announcement ,
-              error: true,
-              errormsg: err
-            }));
+            let viewOption = {...defaultViewOption};
+            viewOption.error = true;
+            viewOption.errormsg = err;
+            return view.render(page, viewOption);
           }
-  
+
           return response.attachment(altFolder);
         });
       } else {
         // Download as mp4 if possible
-        let video = youtubedl(data.url, ['--format=mp4', '-f', option]);
+        let options = ['--format=mp4', '-f', option];
+        if (data.proxy !== "none") {
+          options.push('--proxy');
+          options.push(data.proxy);
+        }
+
+        let video = youtubedl(data.url, options);
 
         video.on('error', function(err) {
           console.error(err);
-          return response.send(view.render(page, {
-            version: version,
-            viewCounter: viewCounter,
-            file: files,
-            day: day, month: month, announcement: announcement ,
-            error: true,
-            errormsg: err
-          }));
+          let viewOption = {...defaultViewOption};
+          viewOption.error = true;
+          viewOption.errormsg = err;
+          return view.render(page, viewOption);
       })
 
         let ext;
@@ -167,8 +175,8 @@ class DownloadController {
 
           // If no title use the ID
           if (title == '_') title = `_${info.id}`;
-          // If user want to hide from the feed 
-          if (data.feed == 'on') 
+          // If user want to hide from the feed
+          if (data.feed == 'on')
             DLFile = `hidden/${title}.${ext}`;
 
             video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
