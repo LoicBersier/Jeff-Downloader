@@ -254,6 +254,7 @@ async function generateThumbnail(f) {
         .on('end', () => {
           // Save space by deleting tmp directory
           for (let files of fs.readdirSync(`./public/thumbnail/tmp/${f}`)) {
+            if (files == '.keep') return;
             fs.unlinkSync(`./public/thumbnail/tmp/${f}/${files}`);
           }
           fs.rmdirSync(`./public/thumbnail/tmp/${f}`);
