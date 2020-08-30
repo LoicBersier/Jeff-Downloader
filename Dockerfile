@@ -13,6 +13,8 @@ RUN cp .env.example .env
 
 RUN echo "[]" > proxy/proxy.json
 
+RUN apt-get update &&  apt-get install -y ffmpeg
+
 EXPOSE 3333
 
 CMD ["pm2-runtime", "server.js"]
