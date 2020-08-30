@@ -1,6 +1,7 @@
 'use strict'
 const youtubedl = require('youtube-dl');
 const fs = require('fs');
+const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const { version } = require('../../../package.json');
 const Antl = use('Antl');
@@ -63,7 +64,14 @@ class DownloadController {
     // Save space by deleting file that doesn't appear in the recent feed
     for (let f of fs.readdirSync('./public/uploads')) {
       if (!file.includes(f) && (f != 'hidden' && f != '.keep')) {
-        fs.unlinkSync(`./public/uploads/${f}`);
+        if (fs.existsSync(`./public/uploads/${f}`))
+          fs.unlinkSync(`./public/uploads/${f}`);
+
+        if (fs.existsSync(`./public/thumbnail/${f}`))
+          fs.unlinkSync(`./public/thumbnail/${f}`);
+
+        if (fs.existsSync(`./public/thumbnail/${f}.png`))
+          fs.unlinkSync(`./public/thumbnail/${f}.png`);
       }
     }
 
@@ -71,11 +79,11 @@ class DownloadController {
       if (f.endsWith('.mp4') || f.endsWith('.webm')) {
         // Send file name, file size in MB relative path for the file
         let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), img: '' });
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), thumbnail: `/thumbnail/${f}` , img: `/thumbnail/${f.replace(path.extname(f), '.png')}` });
       } else if (f.endsWith('.mp3') || f.endsWith('.flac')) {
         // Send file name, file size in MB relative path for the file and relative path of music.png
         let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), img: `/asset/music.png` });
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), thumbnail: `/thumbnail/${f}`, img: `/asset/music.png` });
       }
     }
     defaultViewOption.file = files;
@@ -98,8 +106,6 @@ class DownloadController {
         feed: request.input('feed'),
         proxy: request.input('proxy')
       }
-
-      console.log(data.proxy);
 
       if (!data.url) {
         let viewOption = {...defaultViewOption};
@@ -137,11 +143,10 @@ class DownloadController {
 
         return youtubedl.exec(data.url, options, {}, function(err, output) {
           if (err) {
-            console.error(err);
             let viewOption = {...defaultViewOption};
             viewOption.error = true;
             viewOption.errormsg = err;
-            return view.render(page, viewOption);
+            return response.send(view.render(page, viewOption))
           }
 
           return response.attachment(altFolder);
@@ -161,16 +166,17 @@ class DownloadController {
           let viewOption = {...defaultViewOption};
           viewOption.error = true;
           viewOption.errormsg = err;
-          return view.render(page, viewOption);
-      })
+
+          return response.send(view.render(page, viewOption))
+        })
 
         let ext;
         video.on('info', function(info) {
           // Set file name
           ext = info.ext;
           let title = info.title.slice(0,50);
-          DLFile = `${title.replace(/\s/g, '_')}.${ext}`;
-          DLFile = DLFile.replace(/[()]|[/]|[\\]/g, '_');
+          DLFile = `${title.replace(/\s/g, '')}.${ext}`;
+          DLFile = DLFile.replace(/[()]|[/]|[\\]|[!]|[?]/g, '');
 
           // If no title use the ID
           if (title == '_') title = `_${info.id}`;
@@ -184,6 +190,7 @@ class DownloadController {
         video.on('end', function() {
           if (data.format == 'mp4' || data.format == 'webm') {
             // If user requested mp4 directly attach the file
+            generateThumbnail(DLFile);
             return response.attachment(`./public/uploads/${DLFile}`)
           } else {
             // If user requested an audio format, convert it
@@ -196,6 +203,7 @@ class DownloadController {
             .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
             .on('end', () => {
               fs.unlinkSync(`./public/uploads/${DLFile}`);
+              generateWaveform(DLFile.replace(`.${ext}`, `.${data.format}`));
               return response.attachment(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
             })
           }
@@ -205,3 +213,51 @@ class DownloadController {
 }
 
 module.exports = DownloadController
+
+async function generateWaveform(f) {
+  ffmpeg(`./public/uploads/${f}`)
+    .complexFilter('[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=rgb,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f')
+    .frames(1)
+    .save(`./public/thumbnail/${f.replace(path.extname(f), '.mp4')}`)
+}
+
+async function generateThumbnail(f) {
+  ffmpeg(`./public/uploads/${f}`)
+    .screenshots({
+      timestamps: ['20%'],
+      size: '720x480',
+      folder: './public/thumbnail/',
+      filename: f.replace(path.extname(f), '.png')
+  });
+
+  if (!fs.existsSync(`./public/thumbnail/tmp/${f}`))
+    fs.mkdirSync(`./public/thumbnail/tmp/${f}`)
+
+  ffmpeg(`./public/uploads/${f}`)
+    .complexFilter('select=gt(scene\\,0.8)')
+    .frames(10)
+    .complexFilter('fps=fps=1/10')
+    .save(`./public/thumbnail/tmp/${f}/%03d.png`)
+    .on('error', function(err, stdout, stderr) {
+      console.log('Cannot process video: ' + err.message);
+      return;
+    })
+    .on('end', () => {
+      ffmpeg(`./public/thumbnail/tmp/${f}/%03d.png`)
+        .complexFilter('zoompan=d=(.5+.5)/.5:s=640x480:fps=1/.5,framerate=25:interp_start=0:interp_end=255:scene=100')
+        .format('mp4')
+        .save(`./public/thumbnail/${f}`)
+        .on('error', function(err, stdout, stderr) {
+          console.log('Cannot process video: ' + err.message);
+          return;
+        })
+        .on('end', () => {
+          // Save space by deleting tmp directory
+          for (let files of fs.readdirSync(`./public/thumbnail/tmp/${f}`)) {
+            fs.unlinkSync(`./public/thumbnail/tmp/${f}/${files}`);
+          }
+          fs.rmdirSync(`./public/thumbnail/tmp/${f}`);
+
+        });
+    });
+}

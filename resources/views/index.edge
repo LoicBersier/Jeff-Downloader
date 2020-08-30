@@ -167,11 +167,11 @@
         <div class="columns is-vcentered is-multiline fadein">
             @each(file in file)
             <div class="column hvr-grow">
-                <div class="column box notification is-dark">
+                <div class="column box notification is-dark level">
                     <p class="subtitle">{{ file.name }}</p>
                     <div>
                         <video muted loop onmouseover="this.play()" onmouseout="this.pause();" oncanplay="this.muted=true" poster="{{ file.img }}" preload="metadata">
-                            <source src="{{ file.location }}#t=0.5" >
+                            <source src="/thumbnail/{{ file.name }}.mp4#t=0.5" >
                             <img src="{{ file.img }}" title="Your browser does not support the <video> tag">
                         </video>
                     </div>
