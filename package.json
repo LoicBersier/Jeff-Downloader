@@ -1,6 +1,6 @@
 {
   "name": "jeff-downloader",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "adonis-version": "4.1.0",
   "description": "A video downloader based on youtube-dl",
   "main": "server.js",
