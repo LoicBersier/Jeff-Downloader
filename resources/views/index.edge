@@ -83,6 +83,12 @@
                                         <input class="checkbox" type="checkbox" name="feed" id="feed" title="Use this if you don't want the video you are downloading to be public">
                                         {{ antl.formatMessage('messages.feed') }}
                                     </label>
+
+                                    <label class="checkbox" for="sponsorBlock">
+                                        <input class="checkbox" type="checkbox" name="sponsorBlock" id="sponsorBlock" title="(Using sponsor.ajay.app)">
+                                        (W.I.P) Remove sponsors of video using <a href="https://sponsor.ajay.app/">SponsorBlock</a>
+                                    </label>
+
                                 </div>
                             </div>
                         </div>
@@ -213,6 +219,7 @@
     </section>
     @endif
     <footer class="footer has-background-grey-dark has-text-light has-text-centered">
+        <p>Uses SponsorBlock API from <a href="https://sponsor.ajay.app/">https://sponsor.ajay.app/</a></p>
         <p>{{ antl.formatMessage('messages.footer') }}</p>
         @if(antl._locale == 'ar')
         <bdi><p>{{ antl.formatMessage('messages.footer2p1') }} <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - {{ antl.formatMessage('messages.footer2p2') }} <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/ExplosmR">ExplosmRCG twitter bot</a> - {{ antl.formatMessage('messages.footer2p3') }}: {{ viewCounter }} - {{ antl.formatMessage('messages.footer2p4') }} <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> {{ antl.formatMessage('messages.footer2p5') }} </bdi></p>

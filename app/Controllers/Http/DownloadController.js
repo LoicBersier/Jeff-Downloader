@@ -5,7 +5,8 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const { version } = require('../../../package.json');
 const Antl = use('Antl');
-const proxy = require('../../../proxy/proxy.json')
+const proxy = require('../../../proxy/proxy.json');
+const fetch = require('node-fetch');
 
 let viewCounter = 0;
 let files = [];
@@ -104,7 +105,8 @@ class DownloadController {
         format: request.input('format'),
         alt: request.input('alt'),
         feed: request.input('feed'),
-        proxy: request.input('proxy')
+        proxy: request.input('proxy'),
+        sponsorBlock : request.input('sponsorBlock')
       }
 
       if (!data.url) {
@@ -112,6 +114,19 @@ class DownloadController {
         viewOption.error = true;
         viewOption.errormsg = 'bruh moment, you didin\'t input a link.';
         return view.render(page, viewOption);
+      }
+
+      let videoID;
+      if (data.sponsorBlock) {
+        let regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        let match = data.url.match(regExp);
+        videoID = (match&&match[7].length==11)? match[7] : false;
+        if (!videoID) {
+          let viewOption = {...defaultViewOption};
+          viewOption.error = true;
+          viewOption.errormsg = 'To use sponsorBlock you need a valid youtube link!';
+          return view.render(page, viewOption);
+        }
       }
 
       // Youtube-dl quality settings
@@ -177,6 +192,7 @@ class DownloadController {
           let title = info.title.slice(0,50);
           DLFile = `${title.replace(/\s/g, '')}.${ext}`;
           DLFile = DLFile.replace(/[()]|[/]|[\\]|[!]|[?]/g, '');
+          DLFile = DLFile.replace(',', '');
 
           // If no title use the ID
           if (title == '_') title = `_${info.id}`;
@@ -189,9 +205,64 @@ class DownloadController {
 
         video.on('end', function() {
           if (data.format == 'mp4' || data.format == 'webm') {
-            // If user requested mp4 directly attach the file
-            generateThumbnail(DLFile);
-            return response.attachment(`./public/uploads/${DLFile}`)
+            if (data.sponsorBlock) { // WARNING: THIS PART SUCK
+              let filter = '';
+              let abc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+              fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoID}`)
+                .then(res => res.json())
+                .then(json => {
+                  let i = 0;
+                  let previousEnd;
+                  let usedLetter = [];
+
+                  json.forEach(sponsor => {
+                    usedLetter.push(abc[i]);
+                    if (i === 0) {
+                      filter += `[0:v]trim=start=0:end=${sponsor.segment[0]},setpts=PTS-STARTPTS[${abc[i]}v];`;
+                      filter += `[0:a]atrim=start=0:end=${sponsor.segment[0]},asetpts=PTS-STARTPTS[${abc[i]}a];`;
+                    } else {
+                      filter += `[0:v]trim=start=${previousEnd}:end=${sponsor.segment[0]},setpts=PTS-STARTPTS[${abc[i]}v];`;
+                      filter += `[0:a]atrim=start=${previousEnd}:end=${sponsor.segment[0]},asetpts=PTS-STARTPTS[${abc[i]}a];`;
+                    }
+                    previousEnd = sponsor.segment[1];
+                    i++;
+                  });
+                  usedLetter.push(abc[i]);
+                  filter += `[0:v]trim=start=${previousEnd},setpts=PTS-STARTPTS[${abc[i]}v];`;
+                  filter += `[0:a]atrim=start=${previousEnd},asetpts=PTS-STARTPTS[${abc[i]}a];`;
+                  let video = '';
+                  let audio = '';
+                  usedLetter.forEach(letter => {
+                    video += `[${letter}v]`
+                    audio += `[${letter}a]`
+                  });
+                  filter += `${video}concat=n=${i + 1}[outv];`;
+                  filter += `${audio}concat=n=${i + 1}:v=0:a=1[outa]`;
+
+                  ffmpeg(`./public/uploads/${DLFile}`)
+                    .inputFormat('mp4')
+                    .complexFilter(filter)
+                    .outputOptions('-map [outv]')
+                    .outputOptions('-map [outa]')
+                    .save(`./public/uploads/hidden/nosponsor${DLFile}`)
+                    .on('error', function(err, stdout, stderr) {
+                      console.log(stdout);
+                      console.log(stderr);
+                      console.log('Cannot process video: ' + err.message);
+                      return;
+                    })
+                    .on('end', () => {
+                      console.log('end');
+                      fs.renameSync(`./public/uploads/hidden/nosponsor${DLFile}`, `./public/uploads/${DLFile}`)
+                      response.attachment(`./public/uploads/${DLFile}`)
+                      generateThumbnail(DLFile);
+                    });
+                });
+            } else {
+              // If user requested mp4 directly attach the file
+              response.attachment(`./public/uploads/${DLFile}`)
+              generateThumbnail(DLFile);
+            }
           } else {
             // If user requested an audio format, convert it
             ffmpeg(`./public/uploads/${DLFile}`)
