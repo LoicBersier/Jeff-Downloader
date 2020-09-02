@@ -31,7 +31,6 @@
           <li></li>
           <li></li>
      </ul>
-
     <header>
         <section class="section" id="announcement">
             <div class="container">
@@ -176,10 +175,12 @@
                 <div class="column box notification is-dark level">
                     <p class="subtitle">{{ file.name }}</p>
                     <div>
-                        <video muted loop onmouseover="this.play()" onmouseout="this.pause();" oncanplay="this.muted=true" poster="{{ file.img }}" preload="metadata">
+                    <figure class="is-4by3">
+                        <video muted loop onmouseover="this.play();" onmouseout="this.pause();this.currentTime = 0;" oncanplay="this.muted=true;" poster="{{ file.img }}" preload="metadata">
                             <source src="/thumbnail/{{ file.name }}.mp4#t=0.5" >
                             <img src="{{ file.img }}" title="Your browser does not support the <video> tag">
                         </video>
+                    </figure>
                     </div>
                     <br>
                     <div class="content">
@@ -278,8 +279,11 @@
             document.getElementById('mp3').checked = false;
             document.getElementById('flac').disabled = true;
             document.getElementById('flac').checked = false;
+            document.getElementById('sponsorBlock').disable = true;
+            document.getElementById('sponsorBlock').disable = false;
             document.getElementById('mp4').checked = true;
             document.getElementById('high').checked = true;
+
         } else {
             document.getElementById('small').disabled = false;
             document.getElementById('mp3').disabled = false;
