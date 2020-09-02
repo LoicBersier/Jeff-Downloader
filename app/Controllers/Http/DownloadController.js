@@ -84,7 +84,7 @@ class DownloadController {
       } else if (f.endsWith('.mp3') || f.endsWith('.flac')) {
         // Send file name, file size in MB relative path for the file and relative path of music.png
         let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), thumbnail: `/thumbnail/${f}`, img: `/asset/music.png` });
+        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: path.extname(f), thumbnail: `/thumbnail/${f.replace(path.extname(f), '.png')}`, img: `/thumbnail/${f.replace(path.extname(f), '.png')}` });
       }
     }
     defaultViewOption.file = files;
@@ -183,7 +183,7 @@ class DownloadController {
           viewOption.errormsg = err;
 
           return response.send(view.render(page, viewOption))
-        })
+        });
 
         let ext;
         video.on('info', function(info) {
@@ -200,7 +200,8 @@ class DownloadController {
           if (data.feed == 'on')
             DLFile = `hidden/${title}.${ext}`;
 
-            video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
+          if (data.sponsorBlock) video.pipe(fs.createWriteStream(`./public/uploads/hidden/${DLFile}`));
+          else video.pipe(fs.createWriteStream(`./public/uploads/${DLFile}`));
         });
 
         video.on('end', function() {
@@ -239,21 +240,22 @@ class DownloadController {
                   filter += `${video}concat=n=${i + 1}[outv];`;
                   filter += `${audio}concat=n=${i + 1}:v=0:a=1[outa]`;
 
-                  ffmpeg(`./public/uploads/${DLFile}`)
+                  ffmpeg(`./public/uploads/hidden/${DLFile}`)
                     .inputFormat('mp4')
                     .complexFilter(filter)
                     .outputOptions('-map [outv]')
                     .outputOptions('-map [outa]')
-                    .save(`./public/uploads/hidden/nosponsor${DLFile}`)
+                    .save(`./public/uploads/${DLFile}`)
                     .on('error', function(err, stdout, stderr) {
-                      console.log(stdout);
-                      console.log(stderr);
                       console.log('Cannot process video: ' + err.message);
-                      return;
+                      let viewOption = {...defaultViewOption};
+                      viewOption.error = true;
+                      viewOption.errormsg = err.message;
+
+                      return response.send(view.render(page, viewOption))
                     })
                     .on('end', () => {
                       console.log('end');
-                      fs.renameSync(`./public/uploads/hidden/nosponsor${DLFile}`, `./public/uploads/${DLFile}`)
                       response.attachment(`./public/uploads/${DLFile}`)
                       generateThumbnail(DLFile);
                     });
@@ -266,17 +268,25 @@ class DownloadController {
           } else {
             // If user requested an audio format, convert it
             ffmpeg(`./public/uploads/${DLFile}`)
-            .noVideo()
-            .audioChannels('2')
-            .audioFrequency('44100')
-            .audioBitrate('320k')
-            .format(data.format)
-            .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
-            .on('end', () => {
-              fs.unlinkSync(`./public/uploads/${DLFile}`);
-              generateWaveform(DLFile.replace(`.${ext}`, `.${data.format}`));
-              return response.attachment(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
-            })
+              .noVideo()
+              .audioChannels('2')
+              .audioFrequency('44100')
+              .audioBitrate('320k')
+              .format(data.format)
+              .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
+              .on('error', function(err, stdout, stderr) {
+                  console.log('Cannot process video: ' + err.message);
+                  let viewOption = {...defaultViewOption};
+                  viewOption.error = true;
+                  viewOption.errormsg = err.message;
+
+                  return response.send(view.render(page, viewOption))
+              })
+              .on('end', () => {
+                fs.unlinkSync(`./public/uploads/${DLFile}`);
+                generateWaveform(DLFile.replace(`.${ext}`, `.${data.format}`));
+                return response.attachment(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
+              });
           }
         });
       }
@@ -289,7 +299,10 @@ async function generateWaveform(f) {
   ffmpeg(`./public/uploads/${f}`)
     .complexFilter('[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=rgb,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f')
     .frames(1)
-    .save(`./public/thumbnail/${f.replace(path.extname(f), '.mp4')}`)
+    .on('error', function(err, stdout, stderr) {
+      return console.log('Cannot process video: ' + err.message);
+    })
+    .save(`./public/thumbnail/${f.replace(path.extname(f), '.png')}`)
 }
 
 async function generateThumbnail(f) {
@@ -299,7 +312,10 @@ async function generateThumbnail(f) {
       size: '720x480',
       folder: './public/thumbnail/',
       filename: f.replace(path.extname(f), '.png')
-  });
+    })
+    .on('error', function(err, stdout, stderr) {
+      return console.log('Cannot process video: ' + err.message);
+    });
 
   if (!fs.existsSync(`./public/thumbnail/tmp/${f}`))
     fs.mkdirSync(`./public/thumbnail/tmp/${f}`)
@@ -310,8 +326,7 @@ async function generateThumbnail(f) {
     .complexFilter('fps=fps=1/10')
     .save(`./public/thumbnail/tmp/${f}/%03d.png`)
     .on('error', function(err, stdout, stderr) {
-      console.log('Cannot process video: ' + err.message);
-      return;
+      return console.log('Cannot process video: ' + err.message);
     })
     .on('end', () => {
       ffmpeg(`./public/thumbnail/tmp/${f}/%03d.png`)
@@ -319,8 +334,7 @@ async function generateThumbnail(f) {
         .format('mp4')
         .save(`./public/thumbnail/${f}`)
         .on('error', function(err, stdout, stderr) {
-          console.log('Cannot process video: ' + err.message);
-          return;
+          return console.log('Cannot process video: ' + err.message);
         })
         .on('end', () => {
           // Save space by deleting tmp directory
@@ -329,7 +343,6 @@ async function generateThumbnail(f) {
             fs.unlinkSync(`./public/thumbnail/tmp/${f}/${files}`);
           }
           fs.rmdirSync(`./public/thumbnail/tmp/${f}`);
-
         });
     });
 }
