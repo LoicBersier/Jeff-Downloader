@@ -52,7 +52,8 @@ class DownloadController {
     files = [];
     let file = [];
     for (let f of fs.readdirSync('./public/uploads')) {
-      file.push(f)
+      if (f.endsWith('.mp4') || f.endsWith('.webm') || f.endsWith('.mp3') || f.endsWith('.flac'))
+        file.push(f)
     }
     // get the 5 most recent files
     file = file.sort((a, b) => {
@@ -80,15 +81,13 @@ class DownloadController {
     }
 
     for (let f of file) {
-      if (f.endsWith('.mp4') || f.endsWith('.webm')) {
-        // Send file name, file size in MB relative path for the file
-        let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: f.split('.').pop(), thumbnail: `/thumbnail/${f}` , img: `/thumbnail/${f.replace(path.extname(f), '.png')}` });
-      } else if (f.endsWith('.mp3') || f.endsWith('.flac')) {
-        // Send file name, file size in MB relative path for the file and relative path of music.png
-        let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
-        files.push({ name: f.split('.').slice(0, -1).join('.'), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: path.extname(f), thumbnail: `/thumbnail/${f.replace(path.extname(f), '.png')}`, img: `/thumbnail/${f.replace(path.extname(f), '.png')}` });
+      let fileInfo = formatBytes(fs.statSync(`./public/uploads/${f}`).size).split(' ');
+      let defaultFiles = { name: f.replace(path.extname(f), ''), size: fileInfo[0], unit: fileInfo[1], date: fs.statSync(`./public/uploads/${f}`).ctime, location: `uploads/${f}`, ext: path.extname(f), thumbnail: `/thumbnail/${f}`, img: `/thumbnail/${f.replace(path.extname(f), '.png')}` };
+
+      if (f.endsWith('.mp3') || f.endsWith('.flac')) {
+        defaultFiles.thumbnail = `./thumbnail/${f.replace(path.extname(f), '.png')}`
       }
+      files.push(defaultFiles);
     }
     defaultViewOption.file = files;
 		return view.render('index', defaultViewOption);
@@ -212,13 +211,22 @@ class DownloadController {
             if (data.sponsorBlock) { // WARNING: THIS PART SUCK
               let filter = '';
               let abc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-              fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoID}`)
-                .then(res => res.json())
+              fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoID}?categories=["sponsor","music_offtopic"]`)
+                .then(res => {
+                  if (res.status === 404) {
+                    let viewOption = {...defaultViewOption};
+                    viewOption.error = true;
+                    viewOption.errormsg = 'Couldn\'t find any SponsorBlock data for this video.';
+
+                    return response.send(view.render(page, viewOption));
+                  }
+                  return res.json()
+                })
                 .then(json => {
+                  if (json === undefined) return;
                   let i = 0;
                   let previousEnd;
                   let usedLetter = [];
-
                   json.forEach(sponsor => {
                     usedLetter.push(abc[i]);
                     if (i === 0) {
@@ -302,10 +310,13 @@ async function generateWaveform(f) {
   ffmpeg(`./public/uploads/${f}`)
     .complexFilter('[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=rgb,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f')
     .frames(1)
+    .noVideo()
+    .noAudio()
+    .duration(0.1)
     .on('error', function(err, stdout, stderr) {
       return console.log('Cannot process video: ' + err.message);
     })
-    .save(`./public/thumbnail/${f.replace(path.extname(f), '.png')}`)
+    .save(`./public/thumbnail/${f.replace(path.extname(f), '.mp4')}`)
 }
 
 async function generateThumbnail(f) {
