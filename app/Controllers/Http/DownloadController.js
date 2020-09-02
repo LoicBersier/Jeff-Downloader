@@ -12,7 +12,7 @@ let viewCounter = 0;
 let files = [];
 let day;
 let month;
-let announcementArray;
+let announcementArray = [];
 let announcement;
 let defaultViewOption = { version: version, viewCounter: viewCounter, file: files, day: day, month: month, announcement: announcement, proxy: proxy }
 
@@ -34,8 +34,11 @@ class DownloadController {
   async index ({ view, request, locale }) {
     viewCounter++;
     defaultViewOption.viewCounter = viewCounter;
-    // Couldn't find a cleaner way to make it change with the browser locale
-    announcementArray = [Antl.forLocale(locale).formatMessage('announcement.1'), Antl.forLocale(locale).formatMessage('announcement.2'), Antl.forLocale(locale).formatMessage('announcement.3'), Antl.forLocale(locale).formatMessage('announcement.4'), Antl.forLocale(locale).formatMessage('announcement.5'), Antl.forLocale(locale).formatMessage('announcement.6'), Antl.forLocale(locale).formatMessage('announcement.7')];
+
+    for (let i = 0; Antl.forLocale(locale)._messages.fr.announcement.length > i; i++) {
+      announcementArray.push(Antl.forLocale(locale).formatMessage(`announcement.${i + 1}`));
+    }
+
     // Get random announcement
     defaultViewOption.announcement = announcementArray[Math.floor(Math.random() * announcementArray.length)];
 
