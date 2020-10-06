@@ -211,7 +211,7 @@ class DownloadController {
             if (data.sponsorBlock) { // WARNING: THIS PART SUCK
               let filter = '';
               let abc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-              fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoID}?categories=["sponsor","music_offtopic"]`)
+              fetch(`https://sponsor.ajay.app/api/skipSegments?videoID=${videoID}`)
                 .then(res => {
                   if (res.status === 404) {
                     let viewOption = {...defaultViewOption};
