@@ -1,6 +1,6 @@
 <!--
 What are you doing here 😳😳😳😳
-I guess have fun at looking at the html, no easter egg to find here.
+I guess have fun looking at the html, no easter egg to find here.
 Come take a look here https://gitlab.com/LoicBersier/jeff-downloader for all my bad coding
 -->
 <!DOCTYPE html>
@@ -23,7 +23,7 @@ Come take a look here https://gitlab.com/LoicBersier/jeff-downloader for all my 
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <title>{{ antl.formatMessage('messages.title') }} v{{ version }}</title>
 </head>
-<body class="gradientBG  has-text-light">
+<body class="gradientBG has-text-light">
      <ul class="circles">
           <li></li>
           <li></li>
@@ -63,7 +63,9 @@ Come take a look here https://gitlab.com/LoicBersier/jeff-downloader for all my 
                     <h1 class="title has-text-light">{{ antl.formatMessage('messages.title') }} v{{ version }}</h1>
                     <form name="download-form" method="POST" action="/">
                     {{ csrfField() }}
-
+    @if(month == '11')
+    <script src="JS/snow.js"></script>
+    @endif
                     <div class="field is-horizontal">
                         <div class="field-body">
                             <div class="field is-horizontal">
@@ -306,5 +308,9 @@ Come take a look here https://gitlab.com/LoicBersier/jeff-downloader for all my 
     });
 
     console.log('%cWhat are you doing here 😳😳😳😳', 'font-size: 40px;');
+
+    @if(day == '1' && month == '3')
+      eval(atob('bGV0IGN1ckJsdXI9LjM7ZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LnN0eWxlLmZpbHRlcj1gYmx1cigke2N1ckJsdXJ9cHgpYCxzZXRJbnRlcnZhbCgoKT0+e2N1ckJsdXIrPS4xLGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5zdHlsZS5maWx0ZXI9YGJsdXIoJHtjdXJCbHVyfXB4KWB9LDFlNCk7'));
+    @endif
 </script>
 </html>
