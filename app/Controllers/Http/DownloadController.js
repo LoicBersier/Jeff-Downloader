@@ -316,7 +316,10 @@ async function generateWaveform(f) {
     .on('error', function(err, stdout, stderr) {
       return console.log('Cannot process video: ' + err.message);
     })
-    .save(`./public/thumbnail/${f.replace(path.extname(f), '.mp4')}`)
+    .on('end', () => {
+      generateThumbnail(`../thumbnail/${f.replace(path.extname(f), '.mp4')}`);
+    })
+    .save(`./public/thumbnail/${f.replace(path.extname(f), '.mp4')}`);
 }
 
 async function generateThumbnail(f) {
@@ -331,7 +334,7 @@ async function generateThumbnail(f) {
       return console.log('Cannot process video: ' + err.message);
     });
 
-  if (!fs.existsSync(`./public/thumbnail/tmp/${f}`))
+  if (!fs.existsSync(`./public/thumbnail/tmp/${f}`) && !f.startsWith('../thumbnail'))
     fs.mkdirSync(`./public/thumbnail/tmp/${f}`)
 
   ffmpeg(`./public/uploads/${f}`)
