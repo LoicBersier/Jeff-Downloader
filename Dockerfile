@@ -3,7 +3,7 @@ FROM node:12
 
 WORKDIR /var/www/jeffdownloader/
 
-RUN git clone https://gitlab.com/LoicBersier/jeff-downloader.git .
+RUN git clone https://git.namejeff.xyz/Supositware/jeff-downloader.git .
 
 RUN npm install
 
