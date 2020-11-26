@@ -118,6 +118,10 @@ class DownloadController {
         return view.render(page, viewOption);
       }
 
+      if (data.url.toLowerCase().includes("porn")) {
+        data.feed = "on";
+      }
+
       let videoID;
       if (data.sponsorBlock) {
         let regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
