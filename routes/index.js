@@ -142,6 +142,7 @@ router.post('/', async function(req, res, next) {
 
   video.on('error', function(err) {
     console.error(err);
+    progress[data.uuid] = 0;
     res.json({ error: err.stderr});
   });
 

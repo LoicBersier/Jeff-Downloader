@@ -224,12 +224,13 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
             CheckProgress();
         }, 1000);
 
-		// Définissez ce qui se passe si la soumission s'est opérée avec succès
 		xhttp.addEventListener("load", function(event) {
 			const json = JSON.parse(event.target.responseText);
 			console.log(json);
 			if (json.error) {
-                alert(json.error);
+				clearInterval(progress);
+				document.getElementById('progress').innerHTML = '';
+				alert(json.error);
             } else {
 				const url = json.url;
 
@@ -250,7 +251,6 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
             }, 500)
 		});
 
-		// Definissez ce qui se passe en cas d'erreur
 		xhttp.addEventListener("error", function(event) {
 			clearInterval(progress);
 			document.getElementById('progress').innerHTML = '';
@@ -272,6 +272,9 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
 		});
 
 		xhttp.addEventListener("error", function(event) {
+			clearInterval(progress);
+			document.getElementById('progress').innerHTML = '';
+			alert('whoops, something gone wrong');
 			console.error(event.target.responseText);
 		});
 	}
