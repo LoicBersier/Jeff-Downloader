@@ -3,12 +3,6 @@
   animation-direction: alternate-reverse;
 }
 
-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-}
-
 a:link {
   color: #A0FF9A;
 }
