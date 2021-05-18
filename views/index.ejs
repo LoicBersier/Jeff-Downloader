@@ -24,6 +24,18 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
     <title>jeff</title>
 </head>
 <body class="has-text-light gradientBG">
+    <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
     <section class="section has-text-centered">
         <div class="container ">
                 <h1 class="title has-text-light">Le epic downloader v<%= version %>%></h1>
@@ -182,7 +194,13 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
         </div>
     </section>
 <% } %>
-
+    <footer class="footer has-background-grey-dark has-text-light has-text-centered">
+        <p>Uses SponsorBlock API from <a href="https://sponsor.ajay.app/">https://sponsor.ajay.app/</a></p>
+        <p>I don't take any accountability for downloads made using this website.</p>
+        <p>Credit to <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - My other projects <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/YTPB5k">YTP twitter bot</a> - Numbers of visits: <%= viewCounter %> - Contact <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> on Discord if you have any issues</p>
+        <p>You can also support me either on <a href="https://www.paypal.me/supositware">Paypal</a> Or by tipping <a href="https://basicattentiontoken.org/">BAT</a> on this website!</p>
+        <p><a href="https://git.namejeff.xyz/Supositware/jeff-downloader">Source code</a></p>
+    </footer>
 </body>
 <script>
     let uuid = uuidv4();
