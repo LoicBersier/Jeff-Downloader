@@ -3,6 +3,12 @@
   animation-direction: alternate-reverse;
 }
 
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
 a:link {
   color: #A0FF9A;
 }
@@ -99,11 +105,4 @@ a:hover {
   100% {
     background-color: #ff2400;
   }
-}
-
-progress::-webkit-progress-value {
-  -webkit-transition : width 1s ease;
-  -moz-transition : width 1s ease;
-  -o-transition : width 1s ease;
-  transition : width 1s ease;
 }
