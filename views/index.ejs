@@ -1,0 +1,270 @@
+<!--
+What are you doing here 😳😳😳😳
+I guess have fun looking at the html, no easter egg to find here.
+Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for all my bad coding
+-->
+<!DOCTYPE html>
+<html class="gradientBG" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="jeff" />
+    <meta property="og:description" content="A simple video downloader without any ad or tracking." />
+    <meta property="og:url" content="https://namejeff.xyz/" />
+    <meta property="og:image" content="https://namejeff.xyz/asset/jeff.png" />
+    <meta name="theme-color" content="#3b2ccf" />
+    <link rel="icon" href="/asset/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="asset/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="stylesheets/index.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/background.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <title>jeff</title>
+</head>
+<body class="has-text-light gradientBG">
+    <section class="section has-text-centered">
+        <div class="container ">
+                <h1 class="title has-text-light">Le epic downloader v<%= version %>%></h1>
+                <div class="downloader form">
+                    <form id="download-form" method="POST" action="/" enctype="application/x-www-form-urlencoded">
+                        <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field is-horizontal">
+                                    <div class="control">
+                                        <label class="radio" for="small">
+                                            <input class="radio" type="radio" name="quality" id="small" value="small">
+                                            Low quality
+                                        </label>
+
+                                        <label class="radio" for="high">
+                                            <input class="radio" type="radio" name="quality" id="high" value="high" checked>
+                                            High quality
+                                        </label>
+
+                                        <label class="checkbox" for="alt">
+                                            <input class="checkbox" type="checkbox" name="alt" id="alt" title="Use this if download dosen't work">
+                                            Alternate download
+                                        </label>
+
+                                        <label class="checkbox" for="feed">
+                                            <input class="checkbox" type="checkbox" name="feed" id="feed" title="Use this if you don't want the video you are downloading to be public">
+                                            Hide from feed
+                                        </label>
+
+                                        <label class="checkbox" for="sponsorBlock">
+                                            <input class="checkbox" type="checkbox" name="sponsorBlock" id="sponsorBlock" title="(Using sponsor.ajay.app)">
+                                            (W.I.P) Remove sponsors of video using <a href="https://sponsor.ajay.app/">SponsorBlock</a>
+                                        </label>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-body">
+                            <div class="field is-expanded">
+                                <div class="field has-addons">
+                                    <p class="control is-expanded">
+                                        <input type="text" id="url" name="url" class="downloadurl input is-rounded" placeholder="Link">
+                                    </p>
+                                    <p class="control">
+                                        <button type="submit" class="downloadbtn button is-primary is-rounded" id="button">Download that mf video</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="field has-addon">
+                            <div class="control">
+                            </div>
+                            <div class="control">
+                            </div>
+                        </div>
+
+                        <div class="field is-horizontal level">
+
+                            <div class="control level-left">
+                                <label class="radio" for="mp4">
+                                    <input class="radio" type="radio" name="format" value="mp4" id="mp4" checked>
+                                    Video?
+                                </label>
+
+                                <label class="radio" for="mp3">
+                                    <input class="radio" type="radio" name="format" value="mp3" id="mp3">
+                                    MP3?
+                                </label>
+
+                                <label class="radio" for="flac" title="This is pure placebo">
+                                    <input class="radio" type="radio" name="format" value="flac" id="flac" title="This is pure placebo">
+                                    FLAC?
+                                </label>
+                            </div>
+
+                            <div class="field-body level-right">
+                                <div class="field is-horizontal">
+                                    <div class="control">
+                                        <span>Proxy options:</span>
+                                        <label class="radio" for="none">
+                                            <input class="radio" type="radio" name="proxy" value="none" id="none" checked>
+                                            None
+                                        </label>
+                                        <% proxy.forEach(function(proxy){ %>
+                                            <label class="radio" for="<%= proxy.ip %>">
+                                                <input class="radio" type="radio" name="proxy" value="<%= proxy.ip %>" id="<%= proxy.ip %>">
+                                                <%= proxy.ip.substring(0, proxy.ip.length - 5) %> - <%= proxy.country %>
+                                            </label>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="container" id="progress"></div>
+        </div>
+    </section>
+
+    <% if (files != "") {%>
+    <p class="title has-text-light has-text-centered">Recently downloaded videos</p>
+    <section class="section">
+        <div class="columns is-vcentered is-multiline fadein">
+            <% files.forEach(function(file){ %>
+            <div class="column hvr-grow">
+                <div class="column box notification is-dark level">
+                    <p class="subtitle"><%= file.name %></p>
+                    <div>
+                        <figure class="is-4by3">
+                            <video muted loop onmouseover="this.play();" onmouseout="this.pause();this.currentTime = 0;" oncanplay="this.muted=true;" poster="<%=  file.img %>" preload="metadata">
+                                <source src="/thumbnail/<%= file.name %>.mp4#t=0.5" >
+                                <img src="<%= file.img %>" title="Your browser does not support the <video> tag">
+                            </video>
+                        </figure>
+                    </div>
+                    <br>
+                    <div class="content">
+                        <div class="field has-addons is-centered">
+                            <p class="control">
+                                <a class="button is-link is-rounded" href="<%= file.location %>" download>Download<i class="fas fa-fw fa-file-download" aria-hidden="true"></i></a>
+                            </p>
+                            <p class="control">
+                                <button class="button is-link is-rounded" onclick="toClipboard('https:\/\/namejeff.xyz\/{{ file.location }}')">Copy to clipboard<i class="fas fa-fw fa-clipboard" aria-hidden="true"></i></button>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <div class="tags has-addons">
+                                <span class="tag">File format</span>
+                                <span class="tag is-primary"><%= file.ext %></span>
+                            </div>
+                        </div>
+                        <div class="control">
+                            <div class="tags has-addons">
+                                <span class="tag">File size</span>
+                                <span class="tag is-primary"><%= file.size%>  <%= file.unit %></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <div class="tags has-addons">
+                            <span class="tag">Download date</span>
+                            <span class="tag is-primary"><%= file.date %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+
+        </div>
+    </section>
+<% } %>
+
+</body>
+<script>
+    let uuid = uuidv4();
+    console.log(uuid);
+    let form = document.getElementById('download-form');
+	form.addEventListener("submit", function (event) {
+		event.preventDefault();
+
+		submitDownload();
+	});
+
+    function submitDownload() {
+    	document.getElementById('progress').innerHTML = '<progress class="progress is-success" id="progress-bar" max="100">0%</progress>';
+		let frm = new FormData(form);
+		frm.append('uuid', uuid);
+		console.log(...frm);
+		let xhttp = new XMLHttpRequest();
+
+		console.log('hi');
+		let progress = setInterval(() => {
+            CheckProgress();
+        }, 1000);
+
+		// Définissez ce qui se passe si la soumission s'est opérée avec succès
+		xhttp.addEventListener("load", function(event) {
+			const json = JSON.parse(event.target.responseText);
+			console.log(json);
+			if (json.error) {
+                alert(json.error);
+            } else {
+				const url = json.url;
+
+				let a = document.createElement("a");
+				a.href = url;
+				fileName = url.split("/").pop();
+				a.download = fileName;
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				a.remove();
+
+			}
+
+            clearInterval(progress);
+            setTimeout(() => {
+				document.getElementById('progress').innerHTML = '';
+            }, 500)
+		});
+
+		// Definissez ce qui se passe en cas d'erreur
+		xhttp.addEventListener("error", function(event) {
+			clearInterval(progress);
+			document.getElementById('progress').innerHTML = '';
+			alert('whoops, something gone wrong');
+		});
+
+		xhttp.open("POST", "/", true);
+		xhttp.send(frm);
+    }
+
+    function CheckProgress() {
+		let xhttp = new XMLHttpRequest();
+        xhttp.open("GET", `/status/${uuid}?=${Math.random()}`, true);
+        xhttp.send();
+		xhttp.addEventListener("load", function(event) {
+			console.log(event.target.responseText);
+			document.getElementsByTagName("progress")[0].value = event.target.responseText;
+			document.getElementsByTagName("progress")[0].innerHTML = `${event.target.responseText}%`;
+		});
+
+		xhttp.addEventListener("error", function(event) {
+			console.error(event.target.responseText);
+		});
+	}
+
+	function uuidv4() {
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+	}
+
+    console.log('%cWhat are you doing here 😳😳😳😳', 'font-size: 40px;');
+</script>
+</html>
