@@ -81,6 +81,8 @@ router.get('/status/:uuid', function (req, res ,next) {
   let uuid = req.params.uuid;
   if (progress[uuid]) {
     res.send(progress[uuid]);
+  } else {
+    res.send(undefined);
   }
 });
 

@@ -267,6 +267,7 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
         xhttp.send();
 		xhttp.addEventListener("load", function(event) {
 			console.log(event.target.responseText);
+			if (event.target.responseText === '') return;
 			document.getElementsByTagName("progress")[0].value = event.target.responseText;
 			document.getElementsByTagName("progress")[0].innerHTML = `${event.target.responseText}%`;
 		});
