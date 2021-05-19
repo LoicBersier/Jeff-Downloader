@@ -13,9 +13,9 @@ RUN npm i -g pm2
 
 RUN echo "[]" > proxy/proxy.json
 
-RUN NODE_ENV=production
+ENV NODE_ENV=production
 
-RUN PORT=3333
+ENV PORT=3333
 
 RUN apt-get update && apt-get install -y ffmpeg
 
