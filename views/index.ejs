@@ -4,7 +4,7 @@ I guess have fun looking at the html, no easter egg to find here.
 Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for all my bad coding
 -->
 <!DOCTYPE html>
-<html class="gradientBG" lang="en">
+<html class="has-background-grey-dark" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,20 +24,8 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
     <title>Le epic video downloader v<%= version %></title>
 </head>
 <body class="has-text-light gradientBG">
-    <ul class="circles">
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-    </ul>
     <section class="section has-text-centered">
-        <div class="container ">
+        <div class="container">
                 <h1 class="title has-text-light">Le epic downloader v<%= version %></h1>
                 <div class="downloader form">
                     <form id="download-form" method="POST" action="/" enctype="application/x-www-form-urlencoded">
@@ -45,21 +33,6 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
                             <div class="field-body">
                                 <div class="field is-horizontal">
                                     <div class="control">
-                                        <label class="radio" for="small">
-                                            <input class="radio" type="radio" name="quality" id="small" value="small">
-                                            Low quality
-                                        </label>
-
-                                        <label class="radio" for="high">
-                                            <input class="radio" type="radio" name="quality" id="high" value="high" checked>
-                                            High quality
-                                        </label>
-
-                                        <label class="checkbox" for="alt">
-                                            <input class="checkbox" type="checkbox" name="alt" id="alt" title="Use this if download dosen't work">
-                                            Alternate download
-                                        </label>
-
                                         <label class="checkbox" for="feed">
                                             <input class="checkbox" type="checkbox" name="feed" id="feed" title="Use this if you don't want the video you are downloading to be public">
                                             Hide from feed
@@ -78,8 +51,17 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
                         <div class="field-body">
                             <div class="field is-expanded">
                                 <div class="field has-addons">
+                                    <p class="control">
+                                        <div class="select">
+                                            <select name="format" id="format">
+                                                <option value="mp4">MP4</option>
+                                                <option value="mp3">MP3</option>
+                                                <option value="flac">FLAC</option>
+                                            </select>
+                                        </div>
+                                    </p>
                                     <p class="control is-expanded">
-                                        <input type="text" id="url" name="url" class="downloadurl input is-rounded" placeholder="Link">
+                                        <input type="text" id="url" name="url" class="downloadurl input is-rounded" placeholder="Link" onkeyup="CheckFormat()">
                                     </p>
                                     <p class="control">
                                         <button type="submit" class="downloadbtn button is-primary is-rounded" id="button">Download that mf video</button>
@@ -97,25 +79,7 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
                         </div>
 
                         <div class="field is-horizontal level">
-
-                            <div class="control level-left">
-                                <label class="radio" for="mp4">
-                                    <input class="radio" type="radio" name="format" value="mp4" id="mp4" checked>
-                                    Video?
-                                </label>
-
-                                <label class="radio" for="mp3">
-                                    <input class="radio" type="radio" name="format" value="mp3" id="mp3">
-                                    MP3?
-                                </label>
-
-                                <label class="radio" for="flac" title="This is pure placebo">
-                                    <input class="radio" type="radio" name="format" value="flac" id="flac" title="This is pure placebo">
-                                    FLAC?
-                                </label>
-                            </div>
-
-                            <div class="field-body level-right">
+                            <div class="field-body">
                                 <div class="field is-horizontal">
                                     <div class="control">
                                         <span>Proxy options:</span>
@@ -216,13 +180,11 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
     	document.getElementById('progress').innerHTML = '<progress class="progress is-success" id="progress-bar" max="100">0%</progress>';
 		let frm = new FormData(form);
 		frm.append('uuid', uuid);
-		console.log(...frm);
 		let xhttp = new XMLHttpRequest();
 
-		console.log('hi');
 		let progress = setInterval(() => {
             CheckProgress();
-        }, 1000);
+        }, 2000);
 
 		xhttp.addEventListener("load", function(event) {
 			const json = JSON.parse(event.target.responseText);
@@ -276,6 +238,43 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
 			clearInterval(progress);
 			document.getElementById('progress').innerHTML = '';
 			alert('whoops, something gone wrong');
+			console.error(event.target.responseText);
+		});
+	}
+
+	function CheckFormat() {
+    	let url;
+        try {
+        	url = new URL(document.getElementById("url").value);
+        } catch (e) {
+            return;
+		}
+
+		document.getElementsByClassName("select")[0].className = "select is-loading";
+
+		console.log(encodeURI(url.href));
+		let xhttp = new XMLHttpRequest();
+		xhttp.open("get", `/format?url=${url.href}`, true);
+		xhttp.send();
+		xhttp.addEventListener("load", function(event) {
+			console.log(event.target.responseText);
+
+			let html = [];
+
+			let json = JSON.parse(event.target.responseText);
+			json.forEach(format => {
+                html.push(`<option value="${format.id}">${format.ext} - ${format.note}</option>`);
+            });
+
+			html.reverse();
+			html.push('<option value="mp3">MP3</option>');
+			html.push('<option value="flac">FLAC</option>');
+
+			document.getElementById("format").innerHTML = html;
+			document.getElementsByClassName("select")[0].className = "select";
+		});
+
+		xhttp.addEventListener("error", function(event) {
 			console.error(event.target.responseText);
 		});
 	}

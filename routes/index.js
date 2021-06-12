@@ -80,10 +80,37 @@ router.get('/', function(req, res, next) {
 router.get('/status/:uuid', function (req, res ,next) {
   let uuid = req.params.uuid;
   if (progress[uuid]) {
-    res.send(progress[uuid]);
+    return res.send(progress[uuid]);
   } else {
-    res.send(undefined);
+    return res.send(undefined);
   }
+});
+
+router.get('/format', function (req, res ,next) {
+  let url;
+  let i = 0;
+  try {
+    url = new URL(req.query.url);
+  } catch (e) {
+    return res.send(undefined);
+  }
+
+  let formats = [];
+
+  youtubedl.exec(url.href, ['--dump-json'], {}, function(err, output) {
+    if (err) throw err
+    let json = JSON.parse(output);
+    json.formats.forEach(format => {
+      if (format.vcodec === 'none' || format.acodec === 'none')
+        return;
+
+      i++;
+      formats.push({ext: format.ext, id: format.format_id, note: format.format_note});
+    });
+
+    return res.send(formats);
+  });
+  return;
 });
 
 router.post('/', async function(req, res, next) {
@@ -99,22 +126,17 @@ router.post('/', async function(req, res, next) {
     })
   });
 
-
-  console.log(data.url);
   if (data.url === undefined) {
     //res.render('index', { error: true, errormsg: 'You didn\'t input a link'})
     return res.send('You didn\'t input a link')
   }
 
-  let quality;
-  if (data.quality === 'worst') {
-    quality = 'worst';
-  } else {
-    quality = 'best';
-  }
+  console.log(data.format);
 
-  if (data.format === undefined) {
-    data.format = 'mp4';
+  let format = data.format;
+
+  if (data.format === undefined || data.format === 'mp3' || data.format === 'flac') {
+    format = 'best';
   }
 
   if (data.url.toLowerCase().includes('porn')) {
@@ -132,7 +154,7 @@ router.post('/', async function(req, res, next) {
     }
   }
 
-  let options = ['--format=mp4', '-f', quality];
+  let options = ['-f', format];
   if (data.proxy !== 'none') {
     options.push('--proxy');
     options.push(data.proxy);
@@ -182,7 +204,28 @@ router.post('/', async function(req, res, next) {
 
   video.on('end', function() {
     progress[data.uuid] = 0;
-    if (data.format === 'mp4' || data.format === 'webm') {
+
+    if (data.format === 'mp3' || data.format === 'flac') {
+      // If user requested an audio format, convert it
+      ffmpeg(`./public/uploads/${DLFile}`)
+          .noVideo()
+          .audioChannels('2')
+          .audioFrequency('44100')
+          .audioBitrate('320k')
+          .format(data.format)
+          .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
+          .on('error', function(err, stdout, stderr) {
+            console.log('Cannot process video: ' + err.message);
+            return res.json({error: err.message});
+            //return res.render('index', { error: true, errormsg: err.message})
+          })
+          .on('end', () => {
+            fs.unlinkSync(`./public/uploads/${DLFile}`);
+            if (data.feed !== 'on') generateWaveform(DLFile.replace(`.${ext}`, `.${data.format}`));
+            return res.json({url: `uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`});
+            //return res.attachment(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
+          });
+    } else {
       if (data.sponsorBlock) { // WARNING: THIS PART SUCK
         let filter = '';
         let abc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
@@ -246,26 +289,6 @@ router.post('/', async function(req, res, next) {
         res.json({url: `uploads/${DLFile}`})
         if (data.feed !== 'on') generateThumbnail(DLFile);
       }
-    } else {
-      // If user requested an audio format, convert it
-      ffmpeg(`./public/uploads/${DLFile}`)
-          .noVideo()
-          .audioChannels('2')
-          .audioFrequency('44100')
-          .audioBitrate('320k')
-          .format(data.format)
-          .save(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`)
-          .on('error', function(err, stdout, stderr) {
-            console.log('Cannot process video: ' + err.message);
-            return res.json({error: err.message});
-            //return res.render('index', { error: true, errormsg: err.message})
-          })
-          .on('end', () => {
-            fs.unlinkSync(`./public/uploads/${DLFile}`);
-            if (data.feed !== 'on') generateWaveform(DLFile.replace(`.${ext}`, `.${data.format}`));
-            return res.json({url: `uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`});
-            //return res.attachment(`./public/uploads/${DLFile.replace(`.${ext}`, `.${data.format}`)}`);
-          });
     }
   });
 
