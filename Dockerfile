@@ -7,6 +7,8 @@ RUN git clone https://git.namejeff.xyz/Supositware/jeff-downloader.git .
 
 RUN git checkout progress
 
+RUN git log -1 --format=%h
+
 RUN npm install
 
 RUN npm i -g pm2
