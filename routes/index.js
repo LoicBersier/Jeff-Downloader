@@ -105,7 +105,7 @@ router.get('/format', function (req, res ,next) {
         return;
 
       i++;
-      formats.push({ext: format.ext, id: format.format_id, note: format.format_note});
+      formats.push({ext: format.ext, id: format.format_id, note: `${format.width}x${format.height}`});
     });
 
     return res.send(formats);
