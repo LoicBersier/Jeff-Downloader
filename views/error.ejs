@@ -1,3 +1,35 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html class="has-background-grey-dark" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<%= error.status%>" />
+    <meta property="og:description" content="A simple video downloader without any ad or tracking." />
+    <meta property="og:url" content="https://namejeff.xyz/" />
+    <meta property="og:image" content="https://namejeff.xyz/asset/jeff.png" />
+    <meta name="theme-color" content="#3b2ccf" />
+    <link rel="icon" href="/asset/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="asset/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="stylesheets/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <title><%= error.status%></title>
+</head>
+<body class="has-text-light gradientBG">
+<section class="section has-text-centered">
+    <div class="container">
+            <img src="https://http.cat/<%= error.status %>">
+        </div>
+    </div>
+</section>
+
+<footer class="footer has-background-grey-dark has-text-light has-text-centered">
+    <p>Uses SponsorBlock API from <a href="https://sponsor.ajay.app/">https://sponsor.ajay.app/</a></p>
+    <p>I don't take any accountability for downloads made using this website.</p>
+    <p>Credit to <a href="https://github.com/rg3/youtube-dl/">youtube-dl</a> - My other projects <a href="https://discordapp.com/oauth2/authorize?client_id=377563711927484418&scope=bot&permissions=0">Haha yes</a> & <a href="https://twitter.com/YTPB5k">YTP twitter bot</a> - Contact <a href="https://discord.gg/cNRh5JQ">Supositware#1616</a> on Discord if you have any issues</p>
+    <p>You can also support me either on <a href="https://www.paypal.me/supositware">Paypal</a> Or by tipping <a href="https://basicattentiontoken.org/">BAT</a> on this website!</p>
+    <p><a href="https://git.namejeff.xyz/Supositware/jeff-downloader">Source code</a></p>
+</footer>
+</body>
+</html>
