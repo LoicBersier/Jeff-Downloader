@@ -65,16 +65,14 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
                                     <option value="mp3">MP3</option>
                                     <option value="flac">FLAC</option>
                                 </select>
+
+                                <label for="advanced" class="checkbox">
+                                    <input class="checkbox" type="checkbox" name="advanced" id="advanced" title="Advanced" onclick="CheckFormat()">
+                                    Advanced (Prone to errors!)
+                                </label>
                             </div>
                         </div>
-
-                        <div class="field has-addon">
-                            <div class="control">
-                            </div>
-                            <div class="control">
-                            </div>
-                        </div>
-
+                        <br>
                         <div class="field is-horizontal level">
                             <div class="field-body">
                                 <div class="field is-horizontal">
@@ -251,7 +249,7 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
 
 		console.log(encodeURI(url.href));
 		let xhttp = new XMLHttpRequest();
-		xhttp.open("get", `/format?url=${url.href}`, true);
+		xhttp.open("get", `/format?url=${url.href}&advanced=${document.getElementById("advanced").checked}`, true);
 		xhttp.send();
 		xhttp.addEventListener("load", function(event) {
 			console.log(event.target.responseText);

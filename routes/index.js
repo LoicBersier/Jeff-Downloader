@@ -88,7 +88,6 @@ router.get('/status/:uuid', function (req, res ,next) {
 
 router.get('/format', function (req, res ,next) {
   let url;
-  let i = 0;
   try {
     url = new URL(req.query.url);
   } catch (e) {
@@ -100,17 +99,22 @@ router.get('/format', function (req, res ,next) {
   youtubedl.exec(url.href, ['--dump-json'], {}, function(err, output) {
     if (err) throw err
     let json = JSON.parse(output);
+    console.log(req.query.advanced);
     json.formats.forEach(format => {
-      if (format.vcodec === 'none' || format.acodec === 'none')
+      if (req.query.advanced === 'false' && (format.vcodec === 'none' || format.acodec === 'none'))
         return;
 
-      i++;
-      formats.push({ext: format.ext, id: format.format_id, note: `${format.width}x${format.height}`});
+      let note = `${format.width}x${format.height}`;
+
+      if (req.query.advanced === 'true') {
+        note = format.format
+      }
+
+      formats.push({ext: format.ext, id: format.format_id, note: note});
     });
 
     return res.send(formats);
   });
-  return;
 });
 
 router.post('/', async function(req, res, next) {
