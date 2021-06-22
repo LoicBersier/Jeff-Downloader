@@ -274,6 +274,16 @@ Come take a look here https://git.namejeff.xyz/Supositware/jeff-downloader for a
 		});
 	}
 
+    function toClipboard(text) {
+        if (navigator.clipboard)
+            navigator.clipboard.writeText(text)
+                .catch(err => {
+                    console.error(err);
+                });
+        else
+            console.error('Could not access the clipboard.');
+    }
+
 	function uuidv4() {
 		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 			var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
